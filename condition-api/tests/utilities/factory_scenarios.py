@@ -45,6 +45,8 @@ class TestJwtClaims(dict, Enum):
         'realm_access': {
             'roles': [
                 EpicConditionRole.VIEW_CONDITIONS.value,
+                EpicConditionRole.MANAGE_CONDITIONS.value,
+                EpicConditionRole.EXTRACT_CONDITIONS.value,
             ]
         },
         'resource_access': {
