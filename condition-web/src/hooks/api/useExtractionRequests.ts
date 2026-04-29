@@ -4,7 +4,19 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 export interface ExtractedCondition {
     condition_number?: number | null;
     condition_name?: string | null;
+    condition_text?: string | null;
     topic_tags?: string[] | null;
+    clauses?: ExtractedSubcondition[] | null;
+    subconditions?: ExtractedSubcondition[] | null;
+}
+
+export interface ExtractedSubcondition {
+    clause_identifier?: string | null;
+    clause_text?: string | null;
+    subcondition_identifier?: string | null;
+    subcondition_text?: string | null;
+    clauses?: ExtractedSubcondition[] | null;
+    subconditions?: ExtractedSubcondition[] | null;
 }
 
 export interface ExtractedData {
