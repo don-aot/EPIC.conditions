@@ -25,7 +25,7 @@ const payload = {
   sub: "test-sub",
   resource_access: {
     [OidcConfig.client_id]: {
-      roles: ["view_conditions", "manage_conditions", "extract_conditions"],
+      roles: ["view_conditions", "manage_conditions"],
     },
   },
 };
