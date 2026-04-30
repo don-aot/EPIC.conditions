@@ -20,6 +20,7 @@ import re
 from collections import defaultdict
 from datetime import datetime
 
+from flask import current_app
 from sqlalchemy import and_, case, extract, func, not_
 from sqlalchemy.orm import aliased
 
@@ -1221,11 +1222,11 @@ class ConditionService:
         """Format value"""
         if key_name in formatted_key_names:
             return ConditionService.format_attribute_value(raw_value)
-        return (
-            raw_value.replace("{", "").replace("}", "").replace('"', "")
-            if raw_value
-            else None
-        )
+        if not raw_value:
+            return None
+        if raw_value == "N/A":
+            return raw_value if current_app.config.get('ENABLE_NEW_SUBMIT_FLOW', False) else None
+        return raw_value.replace("{", "").replace("}", "").replace('"', "")
 
     @staticmethod
     def _process_deliverables(deliverables, requires_iem, formatted_key_names):

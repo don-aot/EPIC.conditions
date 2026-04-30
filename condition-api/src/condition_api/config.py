@@ -76,6 +76,11 @@ class _Config():  # pylint: disable=too-few-public-methods
     JWT_OIDC_CACHING_ENABLED = os.getenv('JWT_OIDC_CACHING_ENABLED', 'True')
     JWT_OIDC_JWKS_CACHE_TIMEOUT = 300
 
+    # Feature flag: controls new submit flow behavior (SUBMIT-786, SUBMIT-787)
+    # When False (default): backward-compatible behavior for the Submit application
+    # When True: new submit flow logic is active
+    ENABLE_NEW_SUBMIT_FLOW = os.getenv('ENABLE_NEW_SUBMIT_FLOW', 'false').lower() == 'true'
+
     # DocGen service (external PDF/HTML rendering microservice)
     DOCGEN_SERVICE_URL = os.getenv('DOCGEN_SERVICE_URL', '')
     EAO_LOGO_URL = os.getenv('EAO_LOGO_URL', '')
