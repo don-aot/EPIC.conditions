@@ -42,6 +42,7 @@
       font-weight: bold;
     }
 
+    /* ── HEADER ── */
     .header {
       display: flex;
       justify-content: space-between;
@@ -78,6 +79,7 @@
       text-align: right;
     }
 
+    /* ── BADGES ── */
     .badge {
       display: inline-block;
       padding: 1mm 3.5mm;
@@ -106,11 +108,20 @@
       color: #2e5dd7;
     }
 
+    /* ── RULES ── */
     .separator {
       border: none;
       border-top: 2px solid #d1d5dc;
     }
 
+    .condition-separator {
+      border: none;
+      border-top: 2px solid #d1d5dc;
+      margin-top: 12.7mm;
+      margin-bottom: 12.7mm;
+    }
+
+    /* ── COVER STATS ── */
     .stats-section {
       margin-top: 9mm;
       margin-bottom: 8.5mm;
@@ -136,11 +147,12 @@
       padding-bottom: 2.1mm;
     }
 
+    /* ── INFO BOX ── */
     .info-box {
       background: #f1f8fe;
       border-left: 4px solid #2e5dd7;
       padding: 4.2mm 4.23mm 4.23mm 5.29mm;
-      margin-bottom: 12.7mm;
+      margin-bottom: 14mm;
     }
 
     .info-box p {
@@ -154,16 +166,12 @@
       margin-bottom: 0;
     }
 
-    .condition-block {
-      page-break-inside: auto;
-    }
+    /* ── CONDITION BLOCK ── */
+    /* No page-break constraints on the outer block — let everything flow */
 
-    .condition-header-group {
-      page-break-inside: avoid;
-      page-break-after: avoid;
-    }
-
+    /* Keep heading attached to the next element (metadata card) */
     .condition-heading {
+      page-break-after: avoid;
       font-size: 18pt;
       font-weight: normal;
       color: #0a0a0a;
@@ -175,12 +183,20 @@
       margin-bottom: 4.23mm;
     }
 
+    /*
+     * Metadata card: keep together (it is small, ~20mm) and keep attached
+     * to whatever follows (condition-text or subconditions).
+     * page-break-after: avoid chains with page-break-after: avoid on the
+     * heading to form a 3-element "keep with next" group.
+     */
     .metadata-card {
       background: #f9fafb;
       border: 1px solid #e5e7eb;
       border-radius: 1.06mm;
       padding: 4.5mm;
       margin-bottom: 6.4mm;
+      page-break-inside: avoid;
+      page-break-after: avoid;
     }
 
     .metadata-row1 {
@@ -192,14 +208,7 @@
 
     .metadata-row2 {
       width: 100%;
-      border-collapse: separate;
-      border-spacing: 1.5mm 0;
-    }
-
-    .metadata-row2 .metadata-label {
-      white-space: nowrap;
-      width: 1%;
-      padding-right: 0;
+      border-collapse: collapse;
     }
 
     .metadata-label {
@@ -208,6 +217,7 @@
       padding-right: 1.5mm;
       white-space: nowrap;
       vertical-align: top;
+      width: 1%;
     }
 
     .metadata-value {
@@ -216,89 +226,91 @@
       vertical-align: top;
     }
 
+    /* ── CONDITION TEXT ── */
+    /*
+     * orphans/widows prevent single-line orphans at page breaks.
+     * No page-break-inside: avoid — let long paragraphs break naturally.
+     */
     .condition-text {
       font-size: 12pt;
       color: #101828;
       line-height: 1.5;
       margin-bottom: 6.4mm;
+      orphans: 2;
+      widows: 2;
     }
 
+    /* ── SUBCONDITIONS ──
+     *
+     * Float-based two-column layout (identifier | body).
+     * NO page-break-inside: avoid on items — this is the key change.
+     * Avoiding breaks inside items forces WeasyPrint to push the whole
+     * item to the next page when it doesn't fit, leaving white space.
+     * Instead we let items break at line boundaries and rely on
+     * orphans/widows for readability.
+     */
     .subconditions-list {
-      display: table;
       width: 100%;
-      border-collapse: separate;
-      border-spacing: 0 6.4mm;
-      margin-top: -6.4mm;
-      page-break-inside: auto;
     }
 
-    .subcondition-item {
-      display: table-row;
-      page-break-inside: avoid;
+    .sub-row {
+      margin-bottom: 6.4mm;
+      /* clearfix */
+      overflow: hidden;
     }
 
-    .subcondition-identifier {
-      display: table-cell;
-      width: 14mm;
+    .sub-id {
+      float: left;
+      width: 17mm;
       font-size: 12pt;
       font-weight: bold;
       color: #101828;
       line-height: 1.5;
-      vertical-align: top;
       white-space: nowrap;
+      text-align: right;
+      padding-right: 2mm;
     }
 
-    .subcondition-body {
-      display: table-cell;
-      vertical-align: top;
-    }
-
-    .subcondition-text {
+    .sub-body {
+      margin-left: 17mm;
       font-size: 12pt;
       color: #101828;
       line-height: 1.5;
+      orphans: 2;
+      widows: 2;
     }
 
-    .nested-subconditions {
-      display: table;
-      width: 100%;
-      border-collapse: separate;
-      border-spacing: 0 2.1mm;
+    /* ── NESTED SUBCONDITIONS ── */
+    .nested-list {
       margin-top: 2.1mm;
-      margin-bottom: -2.1mm;
       padding-left: 8.5mm;
-      page-break-inside: auto;
     }
 
-    .nested-subcondition-item {
-      display: table-row;
-      page-break-inside: avoid;
+    .nested-row {
+      margin-bottom: 2.1mm;
+      /* clearfix */
+      overflow: hidden;
     }
 
-    .nested-identifier {
-      display: table-cell;
-      width: 8mm;
+    .nested-id {
+      float: left;
+      width: 11mm;
       font-size: 12pt;
       font-weight: bold;
       color: #101828;
       line-height: 1.5;
-      vertical-align: top;
       white-space: nowrap;
+      text-align: right;
+      padding-right: 2mm;
     }
 
-    .nested-text {
-      display: table-cell;
+    .nested-body {
+      margin-left: 11mm;
       font-size: 12pt;
       color: #101828;
       line-height: 1.5;
-      vertical-align: top;
-    }
-
-    .condition-separator {
-      border: none;
-      border-top: 2px solid #d1d5dc;
-      margin-top: 12.7mm;
-      margin-bottom: 12.7mm;
+      orphans: 2;
+      widows: 2;
     }
 
     {% endraw %}
@@ -357,12 +369,24 @@
     <p><strong>Note:</strong> Conditions with the status &#8216;Awaiting Approval&#8217; have not been approved by a staff member.</p>
   </div>
 
+  {%- macro render_nested(subs) -%}
+  <div class="nested-list">
+    {%- for item in subs | sort(attribute='sort_order') %}
+    <div class="nested-row">
+      <span class="nested-id">{%- if item.subcondition_identifier %}{{ item.subcondition_identifier if item.subcondition_identifier.endswith(')') else item.subcondition_identifier + ')' }}{%- endif %}</span>
+      <div class="nested-body">
+        {{ item.subcondition_text }}
+        {%- if item.subconditions %}{{ render_nested(item.subconditions) }}{%- endif %}
+      </div>
+    </div>
+    {%- endfor %}
+  </div>
+  {%- endmacro %}
+
   {% for condition in conditions %}
   <div class="condition-block">
 
-    <div class="condition-header-group">
-
-    <div class="condition-heading">{{ condition.condition_number }}. {{ condition.condition_name }}</div>
+    <div class="condition-heading">{{ condition.condition_number }}) {{ condition.condition_name }}</div>
 
     {% if condition.amendment_names %}
     <div class="condition-amendment">
@@ -390,7 +414,6 @@
         </tr>
       </table>
     </div>
-    </div>
 
     {% if condition.condition_text %}
     <div class="condition-text">{{ condition.condition_text }}</div>
@@ -399,20 +422,11 @@
     {% if condition.subconditions %}
     <div class="subconditions-list">
       {% for sub in condition.subconditions | sort(attribute='sort_order') %}
-      <div class="subcondition-item">
-        <span class="subcondition-identifier">{{ sub.subcondition_identifier }}</span>
-        <div class="subcondition-body">
-          <span class="subcondition-text">{{ sub.subcondition_text }}</span>
-          {% if sub.subconditions %}
-          <div class="nested-subconditions">
-            {% for nested in sub.subconditions | sort(attribute='sort_order') %}
-            <div class="nested-subcondition-item">
-              <span class="nested-identifier">{{ nested.subcondition_identifier }}</span>
-              <span class="nested-text">{{ nested.subcondition_text }}</span>
-            </div>
-            {% endfor %}
-          </div>
-          {% endif %}
+      <div class="sub-row">
+        <span class="sub-id">{% if sub.subcondition_identifier %}{{ sub.subcondition_identifier if sub.subcondition_identifier.endswith(')') else sub.subcondition_identifier + ')' }}{% endif %}</span>
+        <div class="sub-body">
+          {{ sub.subcondition_text }}
+          {% if sub.subconditions %}{{ render_nested(sub.subconditions) }}{% endif %}
         </div>
       </div>
       {% endfor %}
