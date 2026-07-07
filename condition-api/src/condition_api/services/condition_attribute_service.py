@@ -331,6 +331,21 @@ class ConditionAttributeService:
         }
 
     @staticmethod
+    def delete_single_condition_attribute(condition_id, attribute_id):
+        """Delete a single condition attribute by ID."""
+        attribute = db.session.query(ConditionAttribute).filter_by(
+            id=attribute_id,
+            condition_id=condition_id
+        ).first()
+
+        if not attribute:
+            return False
+
+        db.session.delete(attribute)
+        db.session.commit()
+        return True
+
+    @staticmethod
     def delete_condition_attribute(condition_id, requires_management_plan=None):
         """Remove condition attribute and management plan data, and update condition flag if provided."""
         if requires_management_plan is not None:

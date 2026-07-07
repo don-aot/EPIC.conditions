@@ -35,6 +35,28 @@ export const useUpdateConditionAttributeDetails = (
   });
 };
 
+const deleteSingleConditionAttribute = (conditionId: number, attributeId: number) => {
+  return submitRequest({
+    url: `/attributes/condition/${conditionId}/attribute/${attributeId}`,
+    method: "delete",
+  });
+};
+
+export const useDeleteSingleConditionAttribute = (
+  conditionId?: number,
+  options?: Options
+) => {
+  return useMutation({
+    mutationFn: (attributeId: number) => {
+      if (!conditionId) {
+        return Promise.reject(new Error("Condition ID is required"));
+      }
+      return deleteSingleConditionAttribute(conditionId, attributeId);
+    },
+    ...options,
+  });
+};
+
 const removeConditionAttributes = (
   conditionId: number,
   requiresManagementPlan: boolean
