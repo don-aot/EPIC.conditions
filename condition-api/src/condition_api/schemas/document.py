@@ -18,12 +18,19 @@ class DocumentLabelSchema(Schema):
     project_type = fields.Str(data_key="project_type", allow_none=True)
 
 
+class DocumentCategorySchema(Schema):
+    """Document category schema (used as nested in DocumentTypeSchema)."""
+
+    id = fields.Int(data_key="id")
+    category_name = fields.Str(data_key="category_name")
+
+
 class DocumentTypeSchema(Schema):
     """Documents type schema."""
 
     id = fields.Int(data_key="id")
-    document_category_id = fields.Int(data_key="document_category_id")
     document_type = fields.Str(data_key="document_type")
+    categories = fields.List(fields.Nested(DocumentCategorySchema), data_key="categories")
 
 
 class DocumentSchema(Schema):
@@ -34,7 +41,7 @@ class DocumentSchema(Schema):
     document_label = fields.Str(data_key="document_label")
     document_link = fields.Str(data_key="document_link")
     document_file_name = fields.Str(data_key="document_file_name")
-    document_category_id = fields.Str(data_key="document_category_id")
+    document_category_id = fields.Int(data_key="document_category_id", load_default=None)
     document_category = fields.Str(data_key="document_category")
     document_types = fields.List(fields.Str(), data_key="document_types")
     document_type_id = fields.Int(data_key="document_type_id")

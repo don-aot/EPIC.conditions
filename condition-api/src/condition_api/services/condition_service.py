@@ -708,12 +708,11 @@ class ConditionService:
             db.session.query(
                 Project.project_id,
                 Project.project_name,
-                DocumentType.document_category_id,
+                Document.document_category_id,
                 DocumentCategory.category_name.label("document_category")
             )
             .outerjoin(Document, Project.project_id == Document.project_id)
-            .outerjoin(DocumentType, DocumentType.id == Document.document_type_id)
-            .outerjoin(DocumentCategory, DocumentCategory.id == DocumentType.document_category_id)
+            .outerjoin(DocumentCategory, DocumentCategory.id == Document.document_category_id)
             .filter(Document.document_id == condition_data.document_id)
             .first()
         )
@@ -890,8 +889,7 @@ class ConditionService:
                     )
                     .select_from(Project)
                     .join(Document, Document.project_id == Project.project_id)
-                    .join(DocumentType, DocumentType.id == Document.document_type_id)
-                    .join(DocumentCategory, DocumentCategory.id == DocumentType.document_category_id)
+                    .join(DocumentCategory, DocumentCategory.id == Document.document_category_id)
                     .join(Amendment, Amendment.document_id == Document.id)
                     .join(Condition, Condition.amended_document_id == Amendment.amended_document_id)
                     .filter(filter_condition)
@@ -918,8 +916,7 @@ class ConditionService:
                     )
                     .select_from(Project)
                     .join(Document, Document.project_id == Project.project_id)
-                    .join(DocumentType, DocumentType.id == Document.document_type_id)
-                    .join(DocumentCategory, DocumentCategory.id == DocumentType.document_category_id)
+                    .join(DocumentCategory, DocumentCategory.id == Document.document_category_id)
                     .join(Amendment, Amendment.document_id == Document.id)
                     .join(Condition, Condition.amended_document_id == Amendment.amended_document_id)
                     .filter(filter_condition)
@@ -958,8 +955,7 @@ class ConditionService:
                 Amendment.amendment_name
             )
             .join(Document, Document.project_id == Project.project_id)
-            .join(DocumentType, DocumentType.id == Document.document_type_id)
-            .join(DocumentCategory, DocumentCategory.id == DocumentType.document_category_id)
+            .join(DocumentCategory, DocumentCategory.id == Document.document_category_id)
             .join(Condition, Condition.document_id == Document.document_id)
             .outerjoin(Amendment, Amendment.amended_document_id == Condition.amended_document_id)
             .outerjoin(
@@ -1330,16 +1326,28 @@ class ConditionService:
         document_categories = aliased(DocumentCategory)
         conditions = aliased(Condition)
         subconditions = aliased(Subcondition)
+        parent_docs = aliased(Document)
 
-        document_join, document_type_join, document_label_col, date_col, document_filter, doc_entity =\
+        document_join, _, document_label_col, date_col, document_filter, doc_entity =\
             ConditionService._get_document_joins_and_columns(
                 is_amendment, base_document_info, document_id,
                 document_types, conditions
             )
 
+        if is_amendment:
+            # Category lives on the parent document (Amendment.document_id → Document)
+            category_id_col = parent_docs.document_category_id.label("document_category_id")
+            parent_doc_join = parent_docs.id == doc_entity.document_id
+            category_join = document_categories.id == parent_docs.document_category_id
+        else:
+            # Category lives directly on the document
+            category_id_col = doc_entity.document_category_id.label("document_category_id")
+            parent_doc_join = None
+            category_join = document_categories.id == doc_entity.document_category_id
+
         query = (
             db.session.query(
-                document_types.document_category_id,
+                category_id_col,
                 document_categories.category_name.label("document_category"),
                 document_label_col,
                 conditions.id,
@@ -1363,8 +1371,14 @@ class ConditionService:
             )
             .outerjoin(subconditions, conditions.id == subconditions.condition_id)
             .outerjoin(doc_entity, document_join)
-            .outerjoin(document_types, document_type_join)
-            .outerjoin(document_categories, document_categories.id == document_types.document_category_id)
+        )
+
+        if is_amendment:
+            query = query.outerjoin(parent_docs, parent_doc_join)
+
+        query = (
+            query
+            .outerjoin(document_categories, category_join)
             .filter(document_filter, conditions.id == condition_id)
             .order_by(subconditions.sort_order)
         )

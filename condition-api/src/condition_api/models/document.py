@@ -21,6 +21,7 @@ class Document(BaseModel):
     document_id = Column(String(255), nullable=False)
     amended_id = Column(Integer, ForeignKey('condition.documents.id', ondelete='CASCADE'), nullable=True)
     document_type_id = Column(Integer, ForeignKey('condition.document_types.id', ondelete='CASCADE'), nullable=True)
+    document_category_id = Column(Integer, ForeignKey('condition.document_categories.id', ondelete='RESTRICT'), nullable=True)
     document_label = Column(Text)
     document_link = Column(Text)
     document_file_name = Column(Text)

@@ -102,10 +102,10 @@ export const mockProjects = [
 ];
 
 export const mockDocumentTypes = [
-  { document_category_id: 1, document_type: "Certificate", id: 1 },
-  { document_category_id: 2, document_type: "Exemption Order", id: 2 },
-  { document_category_id: 1, document_type: "Amendment", id: 3 },
-  { document_category_id: 3, document_type: "Other Order", id: 4 },
+  { id: 1, document_type: "Certificate", categories: [{ id: 1, category_name: "Certificate and Amendments" }] },
+  { id: 2, document_type: "Exemption Order", categories: [{ id: 2, category_name: "Exemption Order and Amendments" }] },
+  { id: 3, document_type: "Amendment", categories: [{ id: 1, category_name: "Certificate and Amendments" }, { id: 2, category_name: "Exemption Order and Amendments" }] },
+  { id: 4, document_type: "Other Order", categories: [{ id: 3, category_name: "Other Orders" }] },
 ];
 
 export const mockCategoryData = {

@@ -27,6 +27,7 @@ from condition_api.models import (
     Document,
     DocumentCategory,
     DocumentType,
+    DocumentTypeCategory,
     ManagementPlan,
     Project,
     StaffUser,
@@ -84,19 +85,26 @@ def factory_document_category_model(name="Exemption Order and Amendments"):
 
 
 def factory_document_type_model(category, name="Certificate"):
-    """Document Type"""
-    doc_type = DocumentType(document_type=name, document_category_id=category.id)
+    """Document Type — creates the type and its junction entry for the given category."""
+    doc_type = DocumentType(document_type=name)
     db.session.add(doc_type)
+    db.session.flush()
+    junction = DocumentTypeCategory(
+        document_type_id=doc_type.id,
+        document_category_id=category.id
+    )
+    db.session.add(junction)
     db.session.commit()
     return doc_type
 
 
-def factory_document_model(project_id, document_type_id, is_latest=True, is_active=True):
+def factory_document_model(project_id, document_type_id, document_category_id=None, is_latest=True, is_active=True):
     """Document"""
     document = Document(
         document_id=str(uuid.uuid4()),
         project_id=project_id,
         document_type_id=document_type_id,
+        document_category_id=document_category_id,
         document_label="Label A",
         document_file_name="test.pdf",
         is_latest_amendment_added=is_latest,

@@ -21,7 +21,7 @@ from condition_api.models.amendment import Amendment
 from condition_api.models.condition import Condition
 from condition_api.models.db import db
 from condition_api.models.document import Document
-from condition_api.models.document_category import DocumentCategory
+from condition_api.models.document_category import DocumentCategory  # used in get_all_projects group_by
 from condition_api.models.document_type import DocumentType
 from condition_api.models.project import Project
 
@@ -46,7 +46,7 @@ class ProjectService:
             )
             .outerjoin(Document, and_(Document.project_id == Project.project_id, Document.is_active.is_(True)))
             .outerjoin(DocumentType, DocumentType.id == Document.document_type_id)
-            .outerjoin(DocumentCategory, DocumentCategory.id == DocumentType.document_category_id)
+            .outerjoin(DocumentCategory, DocumentCategory.id == Document.document_category_id)
             .outerjoin(Amendment, Amendment.document_id == Document.id)
             .filter(Project.is_active.is_(True))
             .group_by(
@@ -97,11 +97,9 @@ class ProjectService:
         # Fetch all documents for the project
         documents = (
             db.session.query(Document.id, Document.document_id)
-            .join(DocumentType, DocumentType.id == Document.document_type_id)
-            .join(DocumentCategory, DocumentCategory.id == DocumentType.document_category_id)
             .filter(and_(
                 Document.project_id == project_id,
-                DocumentCategory.id == document_category_id,
+                Document.document_category_id == document_category_id,
                 Document.is_active.is_(True)
             ))
             .all()
@@ -173,12 +171,10 @@ class ProjectService:
                     )
                 ).label("all_approved"))
             .join(Document, Document.document_id == Condition.document_id)
-            .join(DocumentType, DocumentType.id == Document.document_type_id)
-            .join(DocumentCategory, DocumentCategory.id == DocumentType.document_category_id)
             .filter(
                 and_(
                     Document.project_id == project_id,
-                    DocumentCategory.id == document_category_id
+                    Document.document_category_id == document_category_id
                 )
             )
             .filter(

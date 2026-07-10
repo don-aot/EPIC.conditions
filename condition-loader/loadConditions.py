@@ -43,16 +43,26 @@ def insert_subconditions(condition_id, parent_subcondition_id, subconditions):
         if 'subconditions' in subcondition and subcondition['subconditions']:
             insert_subconditions(condition_id, subcondition_id, subcondition['subconditions'])
 
+def get_document_type_id(document_type):
+    """Return document_type_id from document_types table based on type string."""
+    mapping = {
+        "Exemption Order": 2,
+        "Other Order": 4,
+        "Amendment": 3,
+        "Schedule B/Certificate": 1,
+    }
+    return mapping.get(document_type)
+
+
 def get_document_category_id(document_type):
-    """Determine the document_category_id based on document_type."""
-    if document_type == "Exemption Order":
-        return 2
-    elif document_type == "Other Order":
-        return 4
-    elif document_type == "Amendment":
-        return 3
-    elif document_type == "Schedule B/Certificate":
-        return 1
+    """Return document_category_id from document_categories table based on type string."""
+    mapping = {
+        "Exemption Order": 2,
+        "Other Order": 3,
+        "Amendment": 1,
+        "Schedule B/Certificate": 1,
+    }
+    return mapping.get(document_type)
 
 def load_data(folder_path):
     for filename in os.listdir(folder_path):
@@ -66,8 +76,8 @@ def load_data(folder_path):
             document_id = data['document_id']
             document_type = data['document_type']
 
-            # Determine document_category_id
-            document_type_id = get_document_category_id(document_type)
+            document_type_id = get_document_type_id(document_type)
+            document_category_id = get_document_category_id(document_type)
 
             # Check if the record already exists in the 'documents' table
             cur.execute("""
@@ -88,11 +98,11 @@ def load_data(folder_path):
             # Insert into the 'documents' table
             cur.execute("""
                 INSERT INTO condition.documents (
-                    document_id, document_type_id, document_label, document_file_name, 
+                    document_id, document_type_id, document_category_id, document_label, document_file_name,
                     date_issued, act, first_nations, consultation_records_required, project_id, created_date
-                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, NOW())
+                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, NOW())
             """, (
-                document_id, document_type_id, data['display_name'],
+                document_id, document_type_id, document_category_id, data['display_name'],
                 data['document_file_name'], data['date_issued'], data['act'],
                 convert_to_pg_array(data.get('first_nations', [])),
                 data.get('consultation_records_required', False), project_id

@@ -24,6 +24,7 @@ from .db import db, ma, migrate
 from .document import Document
 from .document_category import DocumentCategory
 from .document_type import DocumentType
+from .document_type_category import DocumentTypeCategory
 from .management_plan import ManagementPlan
 from .project import Project
 from .staff_user import StaffUser

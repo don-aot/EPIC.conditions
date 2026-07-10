@@ -1,4 +1,4 @@
-from utils import convert_to_pg_array, get_document_category_id
+from utils import convert_to_pg_array, get_document_type_id, get_document_category_id
 
 def insert_project(cur, project_id, project_name, project_type):
     cur.execute("""
@@ -19,12 +19,13 @@ def insert_document(cur, data, project_id):
 
     cur.execute("""
         INSERT INTO condition.documents (
-            document_id, document_type_id, document_label, document_link,
+            document_id, document_type_id, document_category_id, document_label, document_link,
             document_file_name, date_issued, act, first_nations,
             consultation_records_required, is_latest_amendment_added, project_id, created_date
-        ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, NOW())
+        ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, NOW())
     """, (
         doc_id,
+        get_document_type_id(data['document_type']),
         get_document_category_id(data['document_type']),
         data['display_name'],
         data.get('document_link'),
