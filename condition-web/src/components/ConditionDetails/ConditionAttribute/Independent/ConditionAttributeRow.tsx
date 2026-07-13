@@ -3,10 +3,12 @@ import { Button, IconButton, TableCell, TableRow, TableRowProps } from "@mui/mat
 import { CustomTooltip } from '../../../Shared/Common';
 import { styled } from "@mui/system";
 import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
 import { Save } from "@mui/icons-material";
 import RemoveIcon from '@mui/icons-material/Remove';
 import { BCDesignTokens } from "epic.theme";
 import { IndependentAttributeModel } from "@/models/ConditionAttribute";
+import DeleteConfirmationModal from "../ManagementPlan/DeleteConfirmationModal";
 import {
   CONDITION_KEYS,
   SELECT_OPTIONS,
@@ -47,6 +49,7 @@ export const ConditionAttributeHeadTableCell = styled(TableCell)(() => ({
 type ConditionAttributeRowProps = {
   conditionAttributeItem: IndependentAttributeModel;
   onSave: (updatedAttribute: IndependentAttributeModel) => void;
+  onDelete?: (attribute: IndependentAttributeModel) => void;
   is_approved?: boolean;
   onEditModeChange?: (isEditing: boolean) => void;
   isManagementRequired?: boolean;
@@ -57,6 +60,7 @@ type ConditionAttributeRowProps = {
 const ConditionAttributeRow: React.FC<ConditionAttributeRowProps> = ({
   conditionAttributeItem,
   onSave,
+  onDelete,
   is_approved,
   onEditModeChange,
   isManagementRequired,
@@ -66,6 +70,7 @@ const ConditionAttributeRow: React.FC<ConditionAttributeRowProps> = ({
   const canManage = useHasAllowedRoles([KeycloakRoles.MANAGE_CONDITIONS]);
   const { key: conditionKey, value: attributeValue } = conditionAttributeItem;
   const [isEditable, setIsEditable] = useState(false);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [editableValue, setEditableValue] = useState(attributeValue ?? "");
   const [otherValue, setOtherValue] = useState("");
 
@@ -261,59 +266,76 @@ const ConditionAttributeRow: React.FC<ConditionAttributeRowProps> = ({
   };
 
   return (
-    <PackageTableRow>
-      <ConditionAttributeHeadTableCell align="left">
-        {conditionKey}
-        {(!attributeValue || attributeValue === "{}") && (
-          (isManagementRequired && managementRequiredKeys.includes(conditionKey)) ||
-          (isConsultationRequired && consultationRequiredKeys.includes(conditionKey)) ||
-          (isIEMRequired && iemRequiredKeys.includes(conditionKey))
-        ) && (
-          <CustomTooltip title="This attribute is required and cannot be empty" arrow>
-            <span style={{ color: "red", fontSize: "16px", marginLeft: "4px" }}>*</span>
-          </CustomTooltip>
-        )}
-      </ConditionAttributeHeadTableCell>
-      <ConditionAttributeHeadTableCell align="left">
-        {isEditable ? renderEditableField() : renderAttribute()}
-      </ConditionAttributeHeadTableCell>
-      <ConditionAttributeHeadTableCell
-        align="left"
-        sx={{
-          "&:hover": is_approved
-            ? {}
-            : {
-                backgroundColor: BCDesignTokens.themeGray70,
-              },
+    <>
+      <DeleteConfirmationModal
+        open={deleteModalOpen}
+        title="Delete Attribute?"
+        description={`This attribute will be removed from this submission requirement. It can be re-added under "Add Condition Attribute".<br/><br/>Are you sure you wish to proceed?`}
+        onClose={() => setDeleteModalOpen(false)}
+        onConfirm={() => {
+          setDeleteModalOpen(false);
+          onDelete?.(conditionAttributeItem);
         }}
-      >
-        {is_approved ? (
-          <IconButton size="small" disabled sx={{ cursor: "default" }}>
-            <RemoveIcon />
-          </IconButton>
-        ) : canManage ? (
-          isEditable ? (
-            <Button
-              variant="contained"
-              color="secondary"
-              size="small"
-              sx={{
-                borderRadius: "4px",
-                color: BCDesignTokens.themeGray100,
-              }}
-              onClick={handleSave}
-            >
-              <Save fontSize="small" sx={{ mr: 0.4 }}/>
-              Save
-            </Button>
-          ) : (
-            <IconButton size="small" onClick={() => setIsEditable(true)}>
-              <EditIcon />
+      />
+      <PackageTableRow>
+        <ConditionAttributeHeadTableCell align="left">
+          {conditionKey}
+          {(!attributeValue || attributeValue === "{}") && (
+            (isManagementRequired && managementRequiredKeys.includes(conditionKey)) ||
+            (isConsultationRequired && consultationRequiredKeys.includes(conditionKey)) ||
+            (isIEMRequired && iemRequiredKeys.includes(conditionKey))
+          ) && (
+            <CustomTooltip title="This attribute is required and cannot be empty" arrow>
+              <span style={{ color: "red", fontSize: "16px", marginLeft: "4px" }}>*</span>
+            </CustomTooltip>
+          )}
+        </ConditionAttributeHeadTableCell>
+        <ConditionAttributeHeadTableCell align="left">
+          {isEditable ? renderEditableField() : renderAttribute()}
+        </ConditionAttributeHeadTableCell>
+        <ConditionAttributeHeadTableCell
+          align="left"
+          sx={{
+            "&:hover": is_approved
+              ? {}
+              : {
+                  backgroundColor: BCDesignTokens.themeGray70,
+                },
+          }}
+        >
+          {is_approved ? (
+            <IconButton size="small" disabled sx={{ cursor: "default" }}>
+              <RemoveIcon />
             </IconButton>
-          )
-        ) : null}
-      </ConditionAttributeHeadTableCell>
-    </PackageTableRow>
+          ) : canManage ? (
+            isEditable ? (
+              <Button
+                variant="contained"
+                color="secondary"
+                size="small"
+                sx={{
+                  borderRadius: "4px",
+                  color: BCDesignTokens.themeGray100,
+                }}
+                onClick={handleSave}
+              >
+                <Save fontSize="small" sx={{ mr: 0.4 }}/>
+                Save
+              </Button>
+            ) : (
+              <>
+                <IconButton size="small" onClick={() => setIsEditable(true)}>
+                  <EditIcon />
+                </IconButton>
+                <IconButton size="small" onClick={() => setDeleteModalOpen(true)}>
+                  <DeleteIcon />
+                </IconButton>
+              </>
+            )
+          ) : null}
+        </ConditionAttributeHeadTableCell>
+      </PackageTableRow>
+    </>
   );
 };
 

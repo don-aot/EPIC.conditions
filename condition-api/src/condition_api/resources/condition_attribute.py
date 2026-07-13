@@ -84,3 +84,26 @@ class ConditionAttributeaResource(Resource):
             return 'Condition attribute successfully removed', HTTPStatus.OK
         except (KeyError, ValueError) as err:
             return {"message": str(err)}, HTTPStatus.BAD_REQUEST
+
+
+@cors_preflight("OPTIONS, DELETE")
+@API.route("/condition/<int:condition_id>/attribute/<int:attribute_id>", methods=["DELETE", "OPTIONS"])
+class ConditionSingleAttributeResource(Resource):
+    """Resource for deleting a single condition attribute."""
+
+    @staticmethod
+    @ApiHelper.swagger_decorators(API, endpoint_description="Delete a single condition attribute")
+    @API.response(code=HTTPStatus.OK, description="Delete a single condition attribute")
+    @API.response(HTTPStatus.BAD_REQUEST, "Bad Request")
+    @cross_origin(origins=allowedorigins())
+    @auth.has_one_of_roles([EpicConditionRole.MANAGE_CONDITIONS.value])
+    def delete(condition_id, attribute_id):
+        """Delete a single condition attribute by ID."""
+        try:
+            deleted = ConditionAttributeService.delete_single_condition_attribute(
+                condition_id, attribute_id)
+            if not deleted:
+                return 'No condition attribute found to remove', HTTPStatus.OK
+            return 'Condition attribute successfully removed', HTTPStatus.OK
+        except (KeyError, ValueError) as err:
+            return {"message": str(err)}, HTTPStatus.BAD_REQUEST

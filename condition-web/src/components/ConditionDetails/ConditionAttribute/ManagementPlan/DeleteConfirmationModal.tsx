@@ -22,6 +22,7 @@ type DeleteConfirmationModalProps = {
 const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
   open,
   title = "Delete Management Plan",
+  description = "By deleting this Management Plan, you will lose all of its associated attributes.<br/><br/>Are you sure you wish to proceed?",
   onClose,
   onConfirm,
 }) => {
@@ -58,11 +59,7 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
                 color: "#CE3E39",
                 fontSize: "14px"
             }}
-            dangerouslySetInnerHTML={{
-                __html: `
-                    By deleting this Management Plan, you will lose all of its associated attributes.<br/><br/>Are you sure you wish to proceed?
-                `,
-            }}
+            dangerouslySetInnerHTML={{ __html: description }}
         />
             <DialogActions>
                 <Button color="secondary" onClick={onClose}>
