@@ -7,6 +7,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import joinedload, relationship
 
 from .base_model import BaseModel
+from .document_type_category import DocumentTypeCategory
 
 Base = declarative_base()
 
@@ -37,7 +38,6 @@ class DocumentType(BaseModel):
     @classmethod
     def get_all(cls):
         """Get all document types with their categories eagerly loaded."""
-        from .document_type_category import DocumentTypeCategory  # avoid circular import
         return (
             cls.query
             .options(
