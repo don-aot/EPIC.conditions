@@ -19,31 +19,30 @@ import {
 const StyledTabs = styled(Tabs)({
     transition: 'none',
     minHeight: 0,
-    borderBottom: `1px solid ${BCDesignTokens.surfaceColorBorderDefault}`
+    '& .MuiTabs-indicator': {
+        display: 'none',
+    },
 });
 
 const StyledTab = styled(Tab)(({ theme }) => ({
     height: '31px',
     minHeight: 0,
-    color: theme.palette.secondary.main,
-    fontWeight: 'inherit',
+    color: theme.palette.text.primary,
+    fontWeight: 400,
     backgroundColor: '#EDEBE9',
     marginRight: '4px',
     borderTopLeftRadius: '4px',
     borderTopRightRadius: '4px',
-    border: '1px solid transparent',
-    borderBottom: 'none',
+    border: '1px solid #D6D6D6',
 
     '&.Mui-selected': {
-        color: theme.palette.primary.contrastText,
-        backgroundColor: theme.palette.primary.main,
-        border: `1px solid ${theme.palette.primary.main}`,
+        color: '#313132',
+        backgroundColor: '#FFFFFF',
+        borderTop: '1px solid #D6D6D6',
+        borderLeft: '1px solid #D6D6D6',
+        borderRight: '1px solid #D6D6D6',
         borderBottom: 'none',
         fontWeight: 700,
-    },
-
-    '&:not(.Mui-selected)': {
-        color: BCDesignTokens.surfaceColorBorderDark,
     },
 }));
 
@@ -119,9 +118,7 @@ const CreateConditionInfoTabs: React.FC<{
             <Stack
                 direction="row"
                 alignItems="center"
-                sx={{
-                    borderBottom: `1px solid ${BCDesignTokens.surfaceColorBorderDefault}`
-                }}
+                sx={{ position: 'relative', zIndex: 1 }}
             >
                 <StyledTabs value={selectedTab} onChange={handleTabChange} aria-label="Condition details tabs">
                     <StyledTab label="Condition Requirements" value="requirements" />
@@ -129,7 +126,8 @@ const CreateConditionInfoTabs: React.FC<{
                 </StyledTabs>
 
             </Stack>
-            <Box sx={{ p: 2 }}>
+            <Box sx={{ border: '1px solid #D6D6D6', borderRadius: '0 4px 4px 4px', mt: '-1px', position: 'relative', zIndex: 0 }}>
+                <Box sx={{ border: `1px solid ${BCDesignTokens.surfaceColorBorderDefault}`, borderRadius: '4px', m: '15px 18px 25px 18px', p: 2 }}>
                 <Box sx={{ display: selectedTab === 'requirements' ? 'block' : 'none' }}>
                     <DragDropContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
                         <Droppable
@@ -194,6 +192,7 @@ const CreateConditionInfoTabs: React.FC<{
                             setCondition={setCondition}
                         />
                     )}
+                </Box>
                 </Box>
             </Box>
         </>
