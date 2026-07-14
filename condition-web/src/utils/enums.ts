@@ -6,5 +6,7 @@ export enum DocumentTypes {
 }
 
 export enum DocumentCategory {
+    CertificateAndAmendments = '1',
+    ExemptionOrderAndAmendments = '2',
     OtherOrders = '3'
 }

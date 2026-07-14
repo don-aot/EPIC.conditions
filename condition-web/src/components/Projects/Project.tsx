@@ -25,7 +25,9 @@ export const Project = ({ project }: ProjectParam) => {
     const navigate = useNavigate();
 
     const certificateDocument = project?.documents?.find(
-        (doc) => doc.document_category === "Certificate and Amendments"
+        (doc) =>
+            String(doc.document_category_id) === DocumentCategory.CertificateAndAmendments ||
+            String(doc.document_category_id) === DocumentCategory.ExemptionOrderAndAmendments
     );
 
     // Check if all documents have a status of true excluding other orders
