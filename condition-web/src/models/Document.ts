@@ -55,14 +55,15 @@ export interface ProjectDocumentAllAmendmentsModel {
 
 export interface DocumentTypeModel {
   id: number;
-  document_category_id: number;
   document_type: string;
+  categories: DocumentCategoryModel[];
 }
 
 export interface CreateDocumentModel {
   document_label: string | null;
   document_link: string | null;
   document_type_id?: number | null;
+  document_category_id?: number | null;
   date_issued?: string | null;
   is_latest_amendment_added?: boolean | null;
   is_active?: boolean;

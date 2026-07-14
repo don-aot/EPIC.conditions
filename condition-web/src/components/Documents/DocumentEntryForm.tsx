@@ -126,14 +126,14 @@ export const DocumentEntryForm = ({
     };
 
     const filteredDocumentTypes = (documentType || []).filter((type) => {
-        if (restrictToCategoryId !== null && type.document_category_id !== restrictToCategoryId) return false;
+        if (restrictToCategoryId !== null && !type.categories?.some(c => c.id === restrictToCategoryId)) return false;
         if (!formState.selectedProject || !formState.selectedProject.documents) return true;
 
         const hasCertificate = formState.selectedProject.documents.some((document) =>
-            document.document_types.includes(DocumentType.Certificate)
+            document.document_types?.includes(DocumentType.Certificate)
         );
         const hasExemptionOrder = formState.selectedProject.documents.some((document) =>
-            document.document_types.includes(DocumentType.ExemptionOrder)
+            document.document_types?.includes(DocumentType.ExemptionOrder)
         );
 
         if (type.document_type === DocumentType.Certificate) return !hasExemptionOrder;
@@ -219,6 +219,9 @@ export const DocumentEntryForm = ({
             isLatestAmendment: formState.selectedDocumentType === DocumentTypes.OtherOrder,
         });
 
+        const selectedType = filteredDocumentTypes.find(t => t.id === formState.selectedDocumentType);
+        const resolvedCategoryId = restrictToCategoryId ?? selectedType?.categories?.[0]?.id ?? null;
+
         const payload = isAmendment
             ? {
                 amendment_name: formState.documentLabel,
@@ -230,6 +233,7 @@ export const DocumentEntryForm = ({
                 document_label: formState.documentLabel,
                 document_link: formState.documentLink,
                 document_type_id: formState.selectedDocumentType,
+                document_category_id: resolvedCategoryId,
                 date_issued: formattedDateIssued,
                 is_latest_amendment_added: formState.isLatestAmendment,
                 is_active: true,

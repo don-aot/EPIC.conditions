@@ -4,6 +4,7 @@ Manages the Document Category
 """
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import relationship
 
 from .base_model import BaseModel
 
@@ -17,6 +18,12 @@ class DocumentCategory(BaseModel):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     category_name = Column(String(255), nullable=False)
+
+    document_type_categories = relationship(
+        'DocumentTypeCategory',
+        back_populates='document_category',
+        lazy='select'
+    )
 
     __table_args__ = (
         {'schema': 'condition'}

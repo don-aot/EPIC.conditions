@@ -91,11 +91,8 @@ class DocumentService:
             Project,
             Project.project_id == Document.project_id
         ).outerjoin(
-            DocumentTypeModel,
-            DocumentTypeModel.id == Document.document_type_id
-        ).outerjoin(
             DocumentCategory,
-            DocumentCategory.id == DocumentTypeModel.document_category_id
+            DocumentCategory.id == Document.document_category_id
         ).outerjoin(
             Condition,
             and_(
@@ -104,7 +101,7 @@ class DocumentService:
             )
         ).filter(
             (Project.project_id == project_id)
-            & (DocumentCategory.id == category_id)
+            & (Document.document_category_id == category_id)
             & (Document.is_active.is_(True))
         ).group_by(
             Project.project_name,
@@ -220,6 +217,7 @@ class DocumentService:
             document_label=document.get("document_label"),
             document_link=document.get("document_link"),
             document_type_id=document.get("document_type_id"),
+            document_category_id=document.get("document_category_id"),
             is_latest_amendment_added=document.get("is_latest_amendment_added"),
             is_active=True
         )
@@ -248,6 +246,7 @@ class DocumentService:
         existing_document.document_label = document.get("document_label")
         existing_document.document_link = document.get("document_link")
         existing_document.document_type_id = document.get("document_type_id")
+        existing_document.document_category_id = document.get("document_category_id")
         existing_document.date_issued = date_issued
         existing_document.is_latest_amendment_added = document.get("is_latest_amendment_added")
         existing_document.is_active = document.get("is_active")
@@ -355,13 +354,13 @@ class DocumentService:
             amendment_detail = (
                 db.session.query(
                     Project.project_name.label('project_name'),
-                    DocumentCategory.id.label('document_category_id'),
+                    Document.document_category_id.label('document_category_id'),
                     DocumentCategory.category_name.label('document_category'),
                     extract("year", Amendment.date_issued).label('year_issued')
                 )
-                .outerjoin(Document, Document.project_id == Project.project_id)
-                .outerjoin(DocumentTypeModel, DocumentTypeModel.id == Document.document_type_id)
-                .outerjoin(DocumentCategory, DocumentCategory.id == DocumentTypeModel.document_category_id)
+                .select_from(Document)
+                .outerjoin(DocumentCategory, DocumentCategory.id == Document.document_category_id)
+                .outerjoin(Project, Project.project_id == Document.project_id)
                 .outerjoin(Amendment, Amendment.amended_document_id == document_id)
                 .filter(Document.id == is_amendment_document.document_id)
                 .first()
@@ -372,7 +371,7 @@ class DocumentService:
             document = (
                 db.session.query(
                     Project.project_name.label('project_name'),
-                    DocumentCategory.id.label('document_category_id'),
+                    Document.document_category_id.label('document_category_id'),
                     DocumentCategory.category_name.label('document_category'),
                     Document.document_id.label('document_id'),
                     Document.document_label.label('document_label'),
@@ -381,7 +380,7 @@ class DocumentService:
                 )
                 .outerjoin(Project, Project.project_id == Document.project_id)
                 .outerjoin(DocumentTypeModel, DocumentTypeModel.id == Document.document_type_id)
-                .outerjoin(DocumentCategory, DocumentCategory.id == DocumentTypeModel.document_category_id)
+                .outerjoin(DocumentCategory, DocumentCategory.id == Document.document_category_id)
                 .filter(Document.document_id == document_id)
                 .first()
             )
