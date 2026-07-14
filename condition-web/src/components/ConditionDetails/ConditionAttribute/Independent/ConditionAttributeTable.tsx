@@ -13,7 +13,7 @@ import {
 import AddIcon from '@mui/icons-material/Add';
 import { BCDesignTokens } from "epic.theme";
 import { theme } from "@/styles/theme";
-import { useUpdateConditionAttributeDetails } from "@/hooks/api/useConditionAttribute";
+import { useUpdateConditionAttributeDetails, useDeleteSingleConditionAttribute } from "@/hooks/api/useConditionAttribute";
 import { ConditionModel } from "@/models/Condition";
 import { IndependentAttributeModel } from "@/models/ConditionAttribute";
 import { notify } from "@/components/Shared/Snackbar/snackbarStore";
@@ -73,6 +73,18 @@ const ConditionAttributeTable = memo(({
       {
         onSuccess: onCreateSuccess,
         onError: onCreateFailure,
+      }
+    );
+
+    const { mutateAsync: deleteSingleAttribute } = useDeleteSingleConditionAttribute(
+      condition.condition_id,
+      {
+        onSuccess: () => {
+          notify.success("Attribute deleted successfully");
+          queryClient.invalidateQueries({ queryKey: ["conditions", condition.condition_id] });
+          queryClient.invalidateQueries({ queryKey: [QUERY_KEY.CONDITIONSDETAIL] });
+        },
+        onError: () => notify.error("Failed to delete attribute"),
       }
     );
   
@@ -166,6 +178,20 @@ const ConditionAttributeTable = memo(({
       const data: updateTopicTagsModel = {
         is_condition_attributes_approved: !condition.is_condition_attributes_approved }
       updateConditionDetails(data);
+    };
+
+    const handleDelete = async (attributeToDelete: IndependentAttributeModel) => {
+      await deleteSingleAttribute(Number(attributeToDelete.id));
+
+      setCondition((prevCondition) => ({
+        ...prevCondition,
+        condition_attributes: {
+          independent_attributes: (prevCondition.condition_attributes?.independent_attributes || []).filter(
+            (attr: IndependentAttributeModel) => attr.id !== attributeToDelete.id
+          ),
+          management_plans: prevCondition.condition_attributes?.management_plans || [],
+        },
+      }));
     };
 
     const handleSave = async (updatedAttribute: IndependentAttributeModel) => {
@@ -352,6 +378,7 @@ const ConditionAttributeTable = memo(({
                   key={attribute.id}
                   conditionAttributeItem={attribute}
                   onSave={handleSave}
+                  onDelete={handleDelete}
                   is_approved={condition.is_condition_attributes_approved}
                   onEditModeChange={(isEditing) => {
                     setIsAnyRowEditing(isEditing);
