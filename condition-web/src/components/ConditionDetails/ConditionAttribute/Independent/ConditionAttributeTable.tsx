@@ -146,6 +146,20 @@ const ConditionAttributeTable = memo(({
 
     }, [conditionAttributeDetails?.independent_attributes, setCondition, setIsConsultationRequired, setIsIEMRequired]);
 
+    useEffect(() => {
+      const attrs = condition.condition_attributes?.independent_attributes || [];
+      setIsConsultationRequired(
+        attrs.some((attr: IndependentAttributeModel) =>
+          attr.key === CONDITION_KEYS.REQUIRES_CONSULTATION && attr.value === "true"
+        )
+      );
+      setIsIEMRequired(
+        attrs.some((attr: IndependentAttributeModel) =>
+          attr.key === CONDITION_KEYS.REQUIRES_IEM_TERMS_OF_ENGAGEMENT && attr.value === "true"
+        )
+      );
+    }, [condition.condition_attributes?.independent_attributes]);
+
     const approveConditionAttributes = () => {
       if (isAnyRowEditing) {
         setShowEditingError(true);

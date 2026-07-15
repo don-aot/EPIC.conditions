@@ -44,6 +44,13 @@ class AttributeKeyService:
                 .subquery()
             )
 
+        always_excluded = [
+            AttributeKeys.PARTIES_REQUIRED_TO_BE_SUBMITTED.value,
+            AttributeKeys.DELIVERABLE_NAME.value,
+        ]
+        if not management_plan_id:
+            always_excluded.append(AttributeKeys.MANAGEMENT_PLAN_ACRONYM.value)
+
         attributes_data = (
             db.session.query(
                 attribute_keys.id,
@@ -51,11 +58,7 @@ class AttributeKeyService:
             )
             .filter(
                 ~attribute_keys.id.in_(db.session.query(subquery.c.attribute_key_id)),
-                ~attribute_keys.key_name.in_([
-                    AttributeKeys.PARTIES_REQUIRED_TO_BE_SUBMITTED.value,
-                    AttributeKeys.DELIVERABLE_NAME.value,
-                    AttributeKeys.MANAGEMENT_PLAN_ACRONYM.value,
-                ]),
+                ~attribute_keys.key_name.in_(always_excluded),
             )
             .order_by(attribute_keys.sort_order)
             .all()

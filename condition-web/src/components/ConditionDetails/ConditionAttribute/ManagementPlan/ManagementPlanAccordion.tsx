@@ -38,8 +38,13 @@ import { ApproveButton } from "../ApproveButton";
 import { validateRequiredAttributes } from "@/utils/attributeValidation";
 import { useUpdateConditionDetails } from "@/hooks/api/useConditions";
 import DeleteIcon from '@mui/icons-material/Delete';
+import AddIcon from '@mui/icons-material/Add';
 import DeleteConfirmationModal from "./DeleteConfirmationModal";
 import { useHasAllowedRoles, KeycloakRoles } from "@/hooks/useAuthorization";
+import { useGetAttributes } from "@/hooks/api/useAttributeKey";
+import AttributeModal from "../AttributeModal";
+import DynamicFieldRenderer from "../DynamicFieldRenderer";
+import { SELECT_OPTIONS } from "../Constants";
 
 type Props = {
   attributes: ManagementPlanModel;
@@ -72,6 +77,115 @@ const ManagementPlanAccordion: React.FC<Props> = ({
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const isManagementRequired = true;
   const [planNameError, setPlanNameError] = useState(false);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [selectedAttribute, setSelectedAttribute] = useState("");
+  const [attributeValue, setAttributeValue] = useState("");
+  const [otherValue, setOtherValue] = useState("");
+  const [chips, setChips] = useState<string[]>([]);
+  const [chipInput, setChipInput] = useState("");
+  const [submissionMilestones, setSubmissionMilestones] = useState<string[]>([]);
+  const [milestones, setMilestones] = useState<string[]>([]);
+
+  const planId = !String(attributes.id).includes("-") ? Number(attributes.id) : undefined;
+
+  const {
+    data: attributesData,
+    isPending: isAttributesLoading,
+    isError: isAttributesError,
+    refetch: refetchAttributes,
+  } = useGetAttributes(condition.condition_id, planId);
+
+  useEffect(() => {
+    if (isAddModalOpen) {
+      refetchAttributes();
+    }
+  }, [isAddModalOpen, refetchAttributes]);
+
+  const handleAddConditionAttribute = () => {
+    if (isAttributesLoading) {
+      notify.info("Loading attributes, please wait...");
+      return;
+    }
+    if (isAttributesError) {
+      notify.error("Failed to load attributes");
+      return;
+    }
+    setIsAddModalOpen(true);
+  };
+
+  const handleCloseAddModal = () => {
+    setIsAddModalOpen(false);
+    setSelectedAttribute("");
+    setAttributeValue("");
+    setOtherValue("");
+    setChips([]);
+    setChipInput("");
+    setMilestones([]);
+    setSubmissionMilestones([]);
+  };
+
+  const handleAttributeSelection = () => {
+    if (!selectedAttribute) {
+      notify.error("Please select an attribute before proceeding");
+      return;
+    }
+
+    const formatArray = (arr: string[]) =>
+      `{${arr.filter((item) => item.trim() !== "").map((item) => `"${item.replace(/"/g, '\\"')}"`).join(",")}}`;
+
+    const newAttrValue =
+      selectedAttribute === CONDITION_KEYS.PARTIES_REQUIRED
+        ? formatArray(chips)
+        : selectedAttribute === CONDITION_KEYS.MILESTONES_RELATED_TO_PLAN_SUBMISSION
+        ? submissionMilestones.join(",")
+        : selectedAttribute === CONDITION_KEYS.MILESTONES_RELATED_TO_PLAN_IMPLEMENTATION
+        ? milestones.join(",")
+        : otherValue !== ""
+        ? otherValue
+        : attributeValue;
+
+    const updatedPlans = (condition.condition_attributes?.management_plans || []).map((plan) => {
+      if (plan.id === attributes.id) {
+        return {
+          ...plan,
+          attributes: [
+            ...plan.attributes,
+            {
+              id: `temp-${selectedAttribute}-${Date.now()}`,
+              key: selectedAttribute,
+              value: newAttrValue,
+            },
+          ],
+        };
+      }
+      return plan;
+    });
+
+    updateAttributes({
+      requires_management_plan: true,
+      condition_attribute: {
+        independent_attributes: condition.condition_attributes?.independent_attributes || [],
+        management_plans: updatedPlans,
+      },
+    });
+
+    handleCloseAddModal();
+  };
+
+  const renderAddEditableField = () => {
+    const options = SELECT_OPTIONS[selectedAttribute];
+    return (
+      <DynamicFieldRenderer
+        editMode={false}
+        attributeData={{ key: selectedAttribute, value: attributeValue, setValue: setAttributeValue }}
+        chipsData={{ chips, setChips, chipInput, setChipInput }}
+        submissionMilestonesData={{ submissionMilestones, setSubmissionMilestones }}
+        milestonesData={{ milestones, setMilestones }}
+        otherData={{ otherValue, setOtherValue }}
+        options={options}
+      />
+    );
+  };
 
   const {
     mutateAsync: updatePlanName,
@@ -118,13 +232,29 @@ const ManagementPlanAccordion: React.FC<Props> = ({
       setAttributeHasData(false);
       return;
     }
-  
+
     // Check if any attribute value is non-empty
     const anyHasValue = attributes.attributes.some(attr => (attr.value ?? '').trim() !== '');
-  
+
     setAttributeHasData(anyHasValue);
 
   }, [attributes]);
+
+  useEffect(() => {
+    const attrs = attributes.attributes || [];
+    setIsConsultationRequired(
+      attrs.some(
+        (attr: IndependentAttributeModel) =>
+          attr.key === CONDITION_KEYS.REQUIRES_CONSULTATION && attr.value === "true"
+      )
+    );
+    setIsIEMRequired(
+      attrs.some(
+        (attr: IndependentAttributeModel) =>
+          attr.key === CONDITION_KEYS.REQUIRES_IEM_TERMS_OF_ENGAGEMENT && attr.value === "true"
+      )
+    );
+  }, [attributes.attributes]);
 
   const { data: conditionAttributeDetails, mutateAsync: updateAttributes } = useUpdateConditionAttributeDetails(
     condition.condition_id,
@@ -523,26 +653,62 @@ const ManagementPlanAccordion: React.FC<Props> = ({
             message="Please complete all the required attribute fields before confirming the Management Plan Attributes."
           />
 
-          <Stack sx={{ mt: 5 }} direction={"row"}>
+          <Stack sx={{ mt: 2 }} direction={"row"} justifyContent="space-between" alignItems="flex-end">
+            <Box>
+              {canManage && !attributes.is_approved && attributesData && attributesData.length > 0 && (
+                <Button
+                  variant="contained"
+                  color="secondary"
+                  size="small"
+                  sx={{
+                    padding: "4px 8px",
+                    borderRadius: "4px",
+                    color: BCDesignTokens.themeGray100,
+                  }}
+                  onClick={handleAddConditionAttribute}
+                >
+                  <AddIcon fontSize="small" /> Add Condition Attribute
+                </Button>
+              )}
+            </Box>
+
             {canManage && origin !== 'create' && (
-                <Box width="100%" sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
-                        <ApproveButton
-                            isApproved={attributes.is_approved}
-                            isAnyRowEditing={isAnyRowEditing}
-                            showEditingError={showEditingError}
-                            isEditingPlanName={isEditingPlanName}
-                            onApprove={handleApprovePlan}
-                            label={
-                              attributes.is_approved
-                                ? "Un-confirm Management Plan Attributes"
-                                : "Confirm Management Plan Attributes"
-                            }
-                        />
-                    </Box>
-                </Box>
+              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+                <ApproveButton
+                  isApproved={attributes.is_approved}
+                  isAnyRowEditing={isAnyRowEditing}
+                  showEditingError={showEditingError}
+                  isEditingPlanName={isEditingPlanName}
+                  onApprove={handleApprovePlan}
+                  label={
+                    attributes.is_approved
+                      ? "Un-confirm Management Plan Attributes"
+                      : "Confirm Management Plan Attributes"
+                  }
+                />
+              </Box>
             )}
           </Stack>
+
+          {!isAttributesLoading && (
+            <AttributeModal
+              open={isAddModalOpen}
+              onClose={handleCloseAddModal}
+              attributes={attributesData || []}
+              selectedAttribute={selectedAttribute}
+              onSelectAttribute={setSelectedAttribute}
+              isLoading={isAttributesLoading}
+              renderEditableField={renderAddEditableField}
+              confirmDisabled={
+                !attributeValue &&
+                chips.length === 0 &&
+                milestones.length === 0 &&
+                submissionMilestones.length === 0 &&
+                otherValue === ""
+              }
+              onConfirm={handleAttributeSelection}
+            />
+          )}
         </AccordionDetails>
       </Accordion>
 
