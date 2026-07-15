@@ -268,6 +268,9 @@ const ManagementPlanAccordion: React.FC<Props> = ({
             queryClient.invalidateQueries({
               queryKey: [QUERY_KEY.CONDITIONSDETAIL],
             });
+            queryClient.invalidateQueries({
+              queryKey: [QUERY_KEY.ATTRIBUTEKEYS, condition.condition_id, planId],
+            });
           },
           onError: () => {
             notify.error("Failed to save condition attributes");
@@ -282,6 +285,7 @@ const ManagementPlanAccordion: React.FC<Props> = ({
         notify.success("Attribute deleted successfully");
         queryClient.invalidateQueries({ queryKey: ["conditions", condition.condition_id] });
         queryClient.invalidateQueries({ queryKey: [QUERY_KEY.CONDITIONSDETAIL] });
+        queryClient.invalidateQueries({ queryKey: [QUERY_KEY.ATTRIBUTEKEYS, condition.condition_id, planId] });
       },
       onError: () => notify.error("Failed to delete attribute"),
     }
