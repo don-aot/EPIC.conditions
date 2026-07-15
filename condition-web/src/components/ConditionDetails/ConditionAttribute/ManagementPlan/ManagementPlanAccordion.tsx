@@ -31,7 +31,7 @@ import ConditionAttributeRow from "../../ConditionAttribute/Independent/Conditio
 import { ConditionModel } from "@/models/Condition";
 import { usePatchManagementPlan } from "@/hooks/api/useManagementPlan";
 import DocumentStatusChip from "../../../Projects/DocumentStatusChip";
-import { useUpdateConditionAttributeDetails } from "@/hooks/api/useConditionAttribute";
+import { useUpdateConditionAttributeDetails, useDeleteSingleConditionAttribute } from "@/hooks/api/useConditionAttribute";
 import { useQueryClient } from "@tanstack/react-query";
 import ErrorMessage from "../ErrorMessage";
 import { ApproveButton } from "../ApproveButton";
@@ -144,6 +144,39 @@ const ManagementPlanAccordion: React.FC<Props> = ({
           },
     }
   );
+
+  const { mutateAsync: deleteSingleAttribute } = useDeleteSingleConditionAttribute(
+    condition.condition_id,
+    {
+      onSuccess: () => {
+        notify.success("Attribute deleted successfully");
+        queryClient.invalidateQueries({ queryKey: ["conditions", condition.condition_id] });
+        queryClient.invalidateQueries({ queryKey: [QUERY_KEY.CONDITIONSDETAIL] });
+      },
+      onError: () => notify.error("Failed to delete attribute"),
+    }
+  );
+
+  const handleDeleteAttribute = async (attributeToDelete: IndependentAttributeModel) => {
+    await deleteSingleAttribute(Number(attributeToDelete.id));
+
+    setCondition((prev) => ({
+      ...prev,
+      condition_attributes: {
+        ...prev.condition_attributes,
+        independent_attributes: prev.condition_attributes?.independent_attributes ?? [],
+        management_plans: (prev.condition_attributes?.management_plans || []).map((plan) => {
+          if (plan.id === attributes.id) {
+            return {
+              ...plan,
+              attributes: plan.attributes.filter((attr) => attr.id !== attributeToDelete.id),
+            };
+          }
+          return plan;
+        }),
+      },
+    }));
+  };
 
   const handleUpdatePlan = async (
     updates: Partial<{ name: string; is_approved: boolean }>,
@@ -471,6 +504,7 @@ const ManagementPlanAccordion: React.FC<Props> = ({
                     key={attr.id}
                     conditionAttributeItem={attr}
                     onSave={handleSave}
+                    onDelete={handleDeleteAttribute}
                     is_approved={attributes.is_approved}
                     onEditModeChange={(isEditing) => {
                         setIsAnyRowEditing(isEditing);

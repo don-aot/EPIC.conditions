@@ -69,6 +69,11 @@ const ConditionAttributeRow: React.FC<ConditionAttributeRowProps> = ({
 }) => {
   const canManage = useHasAllowedRoles([KeycloakRoles.MANAGE_CONDITIONS]);
   const { key: conditionKey, value: attributeValue } = conditionAttributeItem;
+
+  const isRequired =
+    (isManagementRequired && managementRequiredKeys.includes(conditionKey)) ||
+    (isConsultationRequired && consultationRequiredKeys.includes(conditionKey)) ||
+    (isIEMRequired && iemRequiredKeys.includes(conditionKey));
   const [isEditable, setIsEditable] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [editableValue, setEditableValue] = useState(attributeValue ?? "");
@@ -327,9 +332,13 @@ const ConditionAttributeRow: React.FC<ConditionAttributeRowProps> = ({
                 <IconButton size="small" onClick={() => setIsEditable(true)}>
                   <EditIcon />
                 </IconButton>
-                <IconButton size="small" onClick={() => setDeleteModalOpen(true)}>
-                  <DeleteIcon />
-                </IconButton>
+                <CustomTooltip title={isRequired ? "Required attributes cannot be deleted" : ""} arrow>
+                  <span>
+                    <IconButton size="small" onClick={() => setDeleteModalOpen(true)} disabled={isRequired}>
+                      <DeleteIcon />
+                    </IconButton>
+                  </span>
+                </CustomTooltip>
               </>
             )
           ) : null}
