@@ -1,6 +1,7 @@
 """Service for extraction request management."""
 import logging
 from datetime import datetime
+from typing import Optional
 
 from flask import current_app
 from sqlalchemy.exc import SQLAlchemyError
@@ -32,7 +33,7 @@ class ExtractionRequestService:
         return None
 
     @staticmethod
-    def _resolve_document_category_id(document_type_id: int | None) -> int | None:
+    def _resolve_document_category_id(document_type_id: Optional[int]) -> Optional[int]:
         """Return the single category for a document type via the junction table."""
         if not document_type_id:
             return None
