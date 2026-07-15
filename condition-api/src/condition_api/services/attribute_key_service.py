@@ -50,6 +50,8 @@ class AttributeKeyService:
         ]
         if not management_plan_id:
             always_excluded.append(AttributeKeys.MANAGEMENT_PLAN_ACRONYM.value)
+        else:
+            always_excluded.append(AttributeKeys.REQUIRES_IEM_TERMS_OF_ENGAGEMENT.value)
 
         attributes_data = (
             db.session.query(
