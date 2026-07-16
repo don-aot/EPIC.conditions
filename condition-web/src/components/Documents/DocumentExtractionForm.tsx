@@ -25,7 +25,7 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import { BCDesignTokens } from "epic.theme";
-import { DocumentLabelModel, DocumentTypeModel, EaoSearchDocumentResult } from "@/models/Document";
+import { DocumentLabelModel, DocumentModel, DocumentType, DocumentTypeModel, EaoSearchDocumentResult } from "@/models/Document";
 import { AvailableProjectModel } from "@/models/Project";
 import { useGetAllProjects } from "@/hooks/api/useProjects";
 import { useGetDocumentLabels, useGetDocumentsByProject, useSearchEaoDocuments } from "@/hooks/api/useDocuments";
@@ -64,8 +64,22 @@ export const DocumentExtractionForm = ({
     );
 
     const { data: activeDocuments = [] } = useGetDocumentsByProject(
-        showAllDocSearch,
+        !!selectedProject,
         selectedProject?.project_id
+    );
+
+    const hasCertificate = useMemo(
+        () => (activeDocuments as DocumentModel[]).some((doc) =>
+            doc.document_types?.includes(DocumentType.Certificate)
+        ),
+        [activeDocuments]
+    );
+
+    const hasExemptionOrder = useMemo(
+        () => (activeDocuments as DocumentModel[]).some((doc) =>
+            doc.document_types?.includes(DocumentType.ExemptionOrder)
+        ),
+        [activeDocuments]
     );
 
     const activeDocumentIds = useMemo(
@@ -200,9 +214,12 @@ export const DocumentExtractionForm = ({
                             Document Type <span style={{ color: "red" }}>*</span>
                         </Typography>
                         <Autocomplete
-                            options={documentType.filter((t) =>
-                                /certificate|order/i.test(t.document_type)
-                            )}
+                            options={documentType.filter((t) => {
+                                if (!/certificate|order/i.test(t.document_type)) return false;
+                                if (t.document_type === DocumentType.Certificate) return !hasExemptionOrder;
+                                if (t.document_type === DocumentType.ExemptionOrder) return !hasCertificate;
+                                return true;
+                            })}
                             value={selectedDocumentType}
                             getOptionLabel={(t) => t.document_type}
                             onChange={(_, v) => {
