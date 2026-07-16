@@ -25,9 +25,9 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import { BCDesignTokens } from "epic.theme";
-import { DocumentLabelModel, DocumentModel, DocumentType, DocumentTypeModel, EaoSearchDocumentResult } from "@/models/Document";
-import { AvailableProjectModel } from "@/models/Project";
-import { useGetAllProjects } from "@/hooks/api/useProjects";
+import { DocumentLabelModel, DocumentType, DocumentTypeModel, EaoSearchDocumentResult } from "@/models/Document";
+import { AvailableProjectModel, ProjectModel } from "@/models/Project";
+import { useGetAllProjects, useGetProjects } from "@/hooks/api/useProjects";
 import { useGetDocumentLabels, useGetDocumentsByProject, useSearchEaoDocuments } from "@/hooks/api/useDocuments";
 import { S3_FOLDER, useUploadDocument } from "@/hooks/api/useObjectStorage";
 import { useCreateExtractionRequest } from "@/hooks/api/useExtractionRequests";
@@ -68,18 +68,25 @@ export const DocumentExtractionForm = ({
         selectedProject?.project_id
     );
 
+    const { data: allProjects = [] } = useGetProjects();
+
+    const selectedProjectFull = useMemo(
+        () => (allProjects as ProjectModel[]).find((p) => p.project_id === selectedProject?.project_id),
+        [allProjects, selectedProject]
+    );
+
     const hasCertificate = useMemo(
-        () => (activeDocuments as DocumentModel[]).some((doc) =>
+        () => (selectedProjectFull?.documents || []).some((doc) =>
             doc.document_types?.includes(DocumentType.Certificate)
         ),
-        [activeDocuments]
+        [selectedProjectFull]
     );
 
     const hasExemptionOrder = useMemo(
-        () => (activeDocuments as DocumentModel[]).some((doc) =>
+        () => (selectedProjectFull?.documents || []).some((doc) =>
             doc.document_types?.includes(DocumentType.ExemptionOrder)
         ),
-        [activeDocuments]
+        [selectedProjectFull]
     );
 
     const activeDocumentIds = useMemo(
