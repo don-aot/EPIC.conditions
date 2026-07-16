@@ -9,6 +9,7 @@ class ExtractionRequestSchema(Schema):
     project_id = fields.Str(required=True)
     document_id = fields.Str(allow_none=True)
     document_type_id = fields.Int(allow_none=True)
+    document_category_id = fields.Int(allow_none=True)
     document_label = fields.Str(allow_none=True)
     date_issued = fields.Str(allow_none=True)
     act = fields.Int(allow_none=True)

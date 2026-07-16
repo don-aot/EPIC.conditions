@@ -1,7 +1,6 @@
 """Service for extraction request management."""
 import logging
 from datetime import datetime
-from typing import Optional
 
 from flask import current_app
 from sqlalchemy.exc import SQLAlchemyError
@@ -9,7 +8,6 @@ from sqlalchemy.orm import selectinload
 
 from condition_api.models.db import db
 from condition_api.models.document import Document
-from condition_api.models.document_type_category import DocumentTypeCategory
 from condition_api.models.extraction_request import ExtractionRequest
 from condition_api.models.project import Project
 from condition_api.services.extraction_import_service import load_extracted_data
@@ -33,19 +31,6 @@ class ExtractionRequestService:
         return None
 
     @staticmethod
-    def _resolve_document_category_id(document_type_id: Optional[int]) -> Optional[int]:
-        """Return the single category for a document type via the junction table."""
-        if not document_type_id:
-            return None
-        row = (
-            db.session.query(DocumentTypeCategory)
-            .filter_by(document_type_id=document_type_id)
-            .order_by(DocumentTypeCategory.id)
-            .first()
-        )
-        return row.document_category_id if row else None
-
-    @staticmethod
     def create(data: dict) -> ExtractionRequest:
         """Create a new extraction request with status pending.
 
@@ -58,6 +43,7 @@ class ExtractionRequestService:
             project_id=data['project_id'],
             document_id=data.get('document_id'),
             document_type_id=data.get('document_type_id'),
+            document_category_id=data.get('document_category_id'),
             uploaded_by_staff_user_id=current_staff_user.id if current_staff_user else None,
             document_label=data.get('document_label'),
             original_file_name=data.get('original_file_name'),
@@ -93,10 +79,6 @@ class ExtractionRequestService:
                 db.session.add(document)
                 logger.info("Created new document document_id=%s from extraction request", document_id)
             else:
-                # Always honour the document type the user explicitly selected, even
-                # when the document already exists in the DB with a different type.
-                # Also clear any stale document_category_id so import picks up the
-                # correct category for the new type.
                 if data.get('document_type_id'):
                     document.document_type_id = data['document_type_id']
 
@@ -187,9 +169,7 @@ class ExtractionRequestService:
                 if document:
                     if req.document_type_id:
                         document.document_type_id = req.document_type_id
-                        document.document_category_id = (
-                            ExtractionRequestService._resolve_document_category_id(req.document_type_id)
-                        )
+                        document.document_category_id = req.document_category_id
                     document.is_active = True
 
             project = db.session.query(Project).filter_by(project_id=req.project_id).first()
@@ -277,9 +257,7 @@ class ExtractionRequestService:
                 if document:
                     if req.document_type_id:
                         document.document_type_id = req.document_type_id
-                        document.document_category_id = (
-                            ExtractionRequestService._resolve_document_category_id(req.document_type_id)
-                        )
+                        document.document_category_id = req.document_category_id
                     document.is_active = True
 
             # Activate the project now that extraction is complete and imported.

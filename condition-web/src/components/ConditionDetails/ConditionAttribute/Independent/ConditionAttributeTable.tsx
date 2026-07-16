@@ -66,6 +66,9 @@ const ConditionAttributeTable = memo(({
       queryClient.invalidateQueries({
         queryKey: [QUERY_KEY.CONDITIONSDETAIL],
       });
+      queryClient.invalidateQueries({
+        queryKey: [QUERY_KEY.ATTRIBUTEKEYS, condition.condition_id],
+      });
     };
   
     const { data: conditionAttributeDetails, mutateAsync: updateAttributes } = useUpdateConditionAttributeDetails(
@@ -83,6 +86,7 @@ const ConditionAttributeTable = memo(({
           notify.success("Attribute deleted successfully");
           queryClient.invalidateQueries({ queryKey: ["conditions", condition.condition_id] });
           queryClient.invalidateQueries({ queryKey: [QUERY_KEY.CONDITIONSDETAIL] });
+          queryClient.invalidateQueries({ queryKey: [QUERY_KEY.ATTRIBUTEKEYS, condition.condition_id] });
         },
         onError: () => notify.error("Failed to delete attribute"),
       }
