@@ -8,6 +8,7 @@ from sqlalchemy.orm import selectinload
 
 from condition_api.models.db import db
 from condition_api.models.document import Document
+from condition_api.models.document_type_category import DocumentTypeCategory
 from condition_api.models.extraction_request import ExtractionRequest
 from condition_api.models.project import Project
 from condition_api.services.extraction_import_service import load_extracted_data
@@ -29,6 +30,19 @@ class ExtractionRequestService:
         if auth_guid:
             return StaffUserService.get_by_auth_guid(auth_guid)
         return None
+
+    @staticmethod
+    def _resolve_document_category_id(document_type_id):
+        """Derive document_category_id from document_type_id via the junction table."""
+        if not document_type_id:
+            return None
+        row = (
+            db.session.query(DocumentTypeCategory)
+            .filter_by(document_type_id=document_type_id)
+            .order_by(DocumentTypeCategory.id)
+            .first()
+        )
+        return row.document_category_id if row else None
 
     @staticmethod
     def create(data: dict) -> ExtractionRequest:
@@ -169,7 +183,9 @@ class ExtractionRequestService:
                 if document:
                     if req.document_type_id:
                         document.document_type_id = req.document_type_id
-                        document.document_category_id = req.document_category_id
+                        document.document_category_id = ExtractionRequestService._resolve_document_category_id(
+                            req.document_type_id
+                        )
                     document.is_active = True
 
             project = db.session.query(Project).filter_by(project_id=req.project_id).first()
@@ -257,7 +273,9 @@ class ExtractionRequestService:
                 if document:
                     if req.document_type_id:
                         document.document_type_id = req.document_type_id
-                        document.document_category_id = req.document_category_id
+                        document.document_category_id = ExtractionRequestService._resolve_document_category_id(
+                            req.document_type_id
+                        )
                     document.is_active = True
 
             # Activate the project now that extraction is complete and imported.

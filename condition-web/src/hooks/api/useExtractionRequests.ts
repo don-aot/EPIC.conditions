@@ -49,6 +49,7 @@ export interface ExtractionRequest {
     project_id: string;
     document_id?: string | null;
     document_type_id?: number | null;
+    document_category_id?: number | null;
     document_label?: string | null;
     original_file_name?: string | null;
     s3_url: string;
@@ -70,6 +71,8 @@ export interface CreateExtractionRequestPayload {
     document_id?: string | null;
     document_type_id?: number | null;
     document_label?: string | null;
+    date_issued?: string | null;
+    act?: number | null;
     original_file_name?: string | null;
     s3_url: string;
     file_size_bytes?: number | null;
