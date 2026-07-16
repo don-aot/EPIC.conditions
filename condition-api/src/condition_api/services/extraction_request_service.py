@@ -95,6 +95,8 @@ class ExtractionRequestService:
             else:
                 # Always honour the document type the user explicitly selected, even
                 # when the document already exists in the DB with a different type.
+                # Also clear any stale document_category_id so import picks up the
+                # correct category for the new type.
                 if data.get('document_type_id'):
                     document.document_type_id = data['document_type_id']
 
@@ -186,8 +188,7 @@ class ExtractionRequestService:
                     if req.document_type_id:
                         document.document_type_id = req.document_type_id
                         document.document_category_id = (
-                            document.document_category_id
-                            or ExtractionRequestService._resolve_document_category_id(req.document_type_id)
+                            ExtractionRequestService._resolve_document_category_id(req.document_type_id)
                         )
                     document.is_active = True
 
@@ -277,8 +278,7 @@ class ExtractionRequestService:
                     if req.document_type_id:
                         document.document_type_id = req.document_type_id
                         document.document_category_id = (
-                            document.document_category_id
-                            or ExtractionRequestService._resolve_document_category_id(req.document_type_id)
+                            ExtractionRequestService._resolve_document_category_id(req.document_type_id)
                         )
                     document.is_active = True
 
