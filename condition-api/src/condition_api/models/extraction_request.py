@@ -18,6 +18,7 @@ class ExtractionRequest(BaseModel):
     project_id = Column(String(255), ForeignKey('condition.projects.project_id'), nullable=False)
     document_id = Column(String(255), nullable=True)
     document_type_id = Column(Integer, ForeignKey('condition.document_types.id'), nullable=True)
+    document_category_id = Column(Integer, ForeignKey('condition.document_categories.id'), nullable=True)
     uploaded_by_staff_user_id = Column(Integer, ForeignKey('condition.staff_users.id'), nullable=True)
     imported_by_staff_user_id = Column(Integer, ForeignKey('condition.staff_users.id'), nullable=True)
     document_label = Column(Text, nullable=True)
