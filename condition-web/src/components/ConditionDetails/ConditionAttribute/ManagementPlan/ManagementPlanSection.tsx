@@ -15,6 +15,7 @@ import { notify } from "@/components/Shared/Snackbar/snackbarStore";
 import { useQueryClient } from "@tanstack/react-query";
 import { QUERY_KEY } from "@/hooks/api/constants";
 import { useHasAllowedRoles, KeycloakRoles } from "@/hooks/useAuthorization";
+import { useUpdateConditionDetails } from "@/hooks/api/useConditions";
 
 type ManagementPlanSectionProps = {
     condition: ConditionModel;
@@ -54,6 +55,12 @@ const ManagementPlanSection = memo(({ condition, setCondition, }: ManagementPlan
       },
     });
 
+    const { mutate: updateConditionDetails } = useUpdateConditionDetails(
+      false,
+      false,
+      condition.condition_id
+    );
+
     const handleAddPlan = async () => {
       const newPlan: ManagementPlanModel = createDefaultManagementPlan(
         `(condition.condition_attributes?.length || 0) + 1-${Date.now()}`,
@@ -91,14 +98,22 @@ const ManagementPlanSection = memo(({ condition, setCondition, }: ManagementPlan
 
     const handleDeletePlan = async (planId: string) => {
       await removeManagementPlan(planId);
-      setCondition((prev) => ({
-        ...prev,
-        condition_attributes: {
-          ...prev.condition_attributes,
-          management_plans: prev.condition_attributes?.management_plans?.filter(p => p.id !== planId) || [],
-          independent_attributes: prev.condition_attributes?.independent_attributes || [],
-        },
-      }));
+      setCondition((prev) => {
+        const remainingPlans = prev.condition_attributes?.management_plans?.filter(p => p.id !== planId) || [];
+        const allApproved = remainingPlans.length > 0 && remainingPlans.every(p => p.is_approved);
+        if (prev.is_condition_attributes_approved !== allApproved) {
+          updateConditionDetails({ is_condition_attributes_approved: allApproved });
+        }
+        return {
+          ...prev,
+          is_condition_attributes_approved: allApproved,
+          condition_attributes: {
+            ...prev.condition_attributes,
+            management_plans: remainingPlans,
+            independent_attributes: prev.condition_attributes?.independent_attributes || [],
+          },
+        };
+      });
     };
 
     return (

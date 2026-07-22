@@ -176,18 +176,28 @@ const ConditionAttribute = memo(({
                             }
                         }}
                     >
-                        <FormControlLabel
-                            value="true"
-                            control={<Radio />}
-                            label="Yes"
-                            disabled={!canManage || (condition?.is_condition_attributes_approved || false)}
-                        />
-                        <FormControlLabel
-                            value="false"
-                            control={<Radio />}
-                            label="No"
-                            disabled={!canManage || (condition?.is_condition_attributes_approved || false)}
-                        />
+                        {(() => {
+                            const plans = condition?.condition_attributes?.management_plans || [];
+                            const isDisabled = !canManage
+                                || (condition?.is_condition_attributes_approved || false)
+                                || (plans.length > 1 && plans.some(p => p.is_approved));
+                            return (
+                                <>
+                                    <FormControlLabel
+                                        value="true"
+                                        control={<Radio />}
+                                        label="Yes"
+                                        disabled={isDisabled}
+                                    />
+                                    <FormControlLabel
+                                        value="false"
+                                        control={<Radio />}
+                                        label="No"
+                                        disabled={isDisabled}
+                                    />
+                                </>
+                            );
+                        })()}
                     </RadioGroup>
                 </FormControl>
 
