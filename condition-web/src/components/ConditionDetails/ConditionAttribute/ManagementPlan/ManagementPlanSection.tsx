@@ -4,6 +4,7 @@ import ManagementPlanAccordion from "./ManagementPlanAccordion";
 import { ConditionModel } from "@/models/Condition";
 import { useRemoveManagementPlan } from "@/hooks/api/useManagementPlan";
 import { notify } from "@/components/Shared/Snackbar/snackbarStore";
+import { useUpdateConditionDetails } from "@/hooks/api/useConditions";
 
 type ManagementPlanSectionProps = {
   condition: ConditionModel;
@@ -20,20 +21,35 @@ const ManagementPlanSection = memo(
       onError: () => notify.error("Failed to delete management plan"),
     });
 
+    const { mutate: updateConditionDetails } = useUpdateConditionDetails(
+      false,
+      false,
+      condition.condition_id
+    );
+
     const handleDeletePlan = async (planId: string) => {
       await removeManagementPlan(planId);
-      setCondition((prev) => ({
-        ...prev,
-        condition_attributes: {
-          ...prev.condition_attributes,
-          management_plans:
-            prev.condition_attributes?.management_plans?.filter(
-              (p) => p.id !== planId
-            ) || [],
-          independent_attributes:
-            prev.condition_attributes?.independent_attributes || [],
-        },
-      }));
+      setCondition((prev) => {
+        const remainingPlans =
+          prev.condition_attributes?.management_plans?.filter(
+            (p) => p.id !== planId
+          ) || [];
+        const allApproved =
+          remainingPlans.length > 0 && remainingPlans.every((p) => p.is_approved);
+        if (prev.is_condition_attributes_approved !== allApproved) {
+          updateConditionDetails({ is_condition_attributes_approved: allApproved });
+        }
+        return {
+          ...prev,
+          is_condition_attributes_approved: allApproved,
+          condition_attributes: {
+            ...prev.condition_attributes,
+            management_plans: remainingPlans,
+            independent_attributes:
+              prev.condition_attributes?.independent_attributes || [],
+          },
+        };
+      });
     };
 
     if (managementPlans.length === 0) return null;
