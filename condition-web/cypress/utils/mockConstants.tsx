@@ -1,3 +1,4 @@
+import type { AuthContextProps } from "react-oidc-context";
 import { EPIC_CONDITION_ROLE } from "../../src/models/Role";
 import { mockAccessToken } from "./testUtils";
 
@@ -63,7 +64,7 @@ export const mockAuthentication = {
   /* eslint-enable @typescript-eslint/no-explicit-any */
   querySessionStatus: () => Promise.resolve(null),
   revokeTokens: () => Promise.resolve(),
-};
+} as unknown as AuthContextProps;
 
 export const mockStaffAccount = {
   isLoading: false,
@@ -88,6 +89,7 @@ export const mockProjects = [
     documents: [
       {
         amendment_count: 1,
+        parent_document_count: 1,
         date_issued: "2024-01-11",
         document_category: "Certificate and Amendments",
         document_category_id: "1",
@@ -242,6 +244,42 @@ export const mockSingleCondition = {
   document_label: "Amendment X",
   project_name: "Project Name"
 };
+
+export const mockSingleConditionWithReport = {
+  ...mockSingleCondition,
+  condition: {
+    ...mockSingleCondition.condition,
+    condition_attributes: {
+      independent_attributes: [],
+      management_plans: [],
+    },
+    requires_management_plan: false,
+    requires_report: true,
+  },
+};
+
+export const mockReports = [
+  {
+    id: 501,
+    condition_id: 999,
+    report_type: "Compliance Notification",
+    name: null,
+    submissions: [
+      {
+        id: 9001,
+        report_id: 501,
+        phase: "All Phases",
+        frequency: "As Needed",
+        timing: "Within 72 hours of non-compliance",
+        condition_subsection: null,
+        report_submission_type: null,
+        is_approved: false,
+        linked_management_plan_id: null,
+        report_title: null,
+      },
+    ],
+  },
+];
 
 export const approveManagementPlanRequest = {
   is_approved: true,

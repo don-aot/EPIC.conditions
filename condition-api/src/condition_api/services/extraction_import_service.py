@@ -10,6 +10,7 @@ from condition_api.models.condition import Condition
 from condition_api.models.condition_attribute import ConditionAttribute
 from condition_api.models.db import db
 from condition_api.models.document import Document
+from condition_api.models.iem_terms import IEMTerms
 from condition_api.models.management_plan import ManagementPlan
 from condition_api.models.report import Report
 from condition_api.models.report_submission import ReportSubmission
@@ -158,7 +159,17 @@ class ExtractionImportService:
     def _create_deliverables(self, condition: Condition, deliverables: list[dict[str, Any]]) -> None:
         for deliverable in deliverables:
             management_plan = None
-            if deliverable.get("is_plan"):
+            iem_terms = None
+            if deliverable.get("is_iem_terms_of_engagement"):
+                condition.requires_iem_terms = True
+                iem_terms = IEMTerms(
+                    condition_id=condition.id,
+                    name=deliverable.get("deliverable_name"),
+                    is_approved=False,
+                )
+                db.session.add(iem_terms)
+                db.session.flush()
+            elif deliverable.get("is_plan"):
                 condition.requires_management_plan = True
                 management_plan = ManagementPlan(
                     condition_id=condition.id,
@@ -187,6 +198,7 @@ class ExtractionImportService:
                     attribute_key_id=attribute_key.id,
                     attribute_value=self._serialize_attribute_value(raw_value),
                     management_plan_id=management_plan.id if management_plan else None,
+                    iem_terms_id=iem_terms.id if iem_terms else None,
                 )
                 db.session.add(attribute)
 
@@ -199,6 +211,7 @@ class ExtractionImportService:
                         attribute_key_id=attribute_key.id,
                         attribute_value=submission_time_value,
                         management_plan_id=management_plan.id if management_plan else None,
+                        iem_terms_id=iem_terms.id if iem_terms else None,
                     ))
 
     def _create_reports(self, condition: Condition, reports_data: list[dict[str, Any]]) -> None:

@@ -92,7 +92,7 @@ jobs:
 
       - name: Coverage Report
         run: |
-          npx nyc report --reporter=lcov --reporter=text-summary
+          npx nyc report --reporter=lcov --reporter=text-summary --reporter=text
 
   build-check:
     needs: setup-job

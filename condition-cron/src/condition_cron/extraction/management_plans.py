@@ -99,6 +99,17 @@ def extract_management_plan_info_using_gpt(condition_text: str) -> str:
                         "type": "boolean",
                         "description": "Whether or not the deliverable is a \"Plan\" document (e.g., Management Plan, Monitoring Plan, Mitigation Plan, etc.). False if not specified."
                       },
+                      "is_iem_terms_of_engagement": {
+                        "type": "boolean",
+                        "description": (
+                            "True only if this deliverable IS the Independent Environmental Monitor (IEM) "
+                            "Terms of Engagement / Terms of Reference document itself — the document that "
+                            "defines the IEM's role, responsibilities, authority, and reporting relationship. "
+                            "False for any other plan or report, even one the IEM is involved in preparing, "
+                            "reviewing, or implementing, and false for ordinary environmental monitoring plans "
+                            "that are not specifically about defining the IEM's own terms of engagement."
+                        ),
+                      },
                       "approval_type": {
                         "type": "string",
                         "enum": ["Review", "Acceptance", "Satisfaction", "Approval", "Other"],

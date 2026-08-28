@@ -1,6 +1,15 @@
+import type { AuthContextProps } from "react-oidc-context";
 import { OidcConfig } from "../../src/utils/config";
 
-export const mockZustandStore = (storeModule, initialState) => {
+type ZustandStoreModule<T extends { reset: () => void }> = {
+  getState: () => T;
+  setState: (partial: Partial<T>, replace: boolean) => void;
+};
+
+export const mockZustandStore = <T extends { reset: () => void }>(
+  storeModule: ZustandStoreModule<T>,
+  initialState: Partial<T>
+) => {
   const storeResetFn = storeModule.getState().reset;
 
   storeModule.setState(initialState, true); // Reset the store state to initialState
@@ -67,4 +76,4 @@ export const mockAuth = {
     redirect_uri: "http://localhost/callback",
   },
   events: {} as Record<string, (...args: unknown[]) => void>,
-};
+} as unknown as AuthContextProps;

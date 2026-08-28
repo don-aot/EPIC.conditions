@@ -15,7 +15,9 @@ import {
     mockDocument,
     mockConditions,
     mockStaffUser,
-    mockSingleCondition
+    mockSingleCondition,
+    mockSingleConditionWithReport,
+    mockReports
 } from "../../../utils/mockConstants";
 import { ThemeProvider } from '@mui/material/styles';
 import { theme } from "../../../../src/styles/theme";
@@ -160,7 +162,7 @@ describe("conditions details page", () => {
     cy.contains("BC Ministry of Environment").should("exist");
 
     // Click the button to approve the management plan attributes
-    cy.contains("Approve Management Plan Attributes").click();
+    cy.contains("Confirm Management Plan Attributes").click();
 
     // Wait for the PATCH request to complete and assert response
     cy.wait("@approveManagementPlan").then((interception) => {
@@ -171,6 +173,67 @@ describe("conditions details page", () => {
 
     // Assert that the condition attribute is approved
     cy.contains("Confirmed").should("exist");
-    cy.contains("Un-approve Management Plan Attributes").should("exist");
+    cy.contains("Un-confirm Management Plan Attributes").should("exist");
+  });
+
+  it("displays the Reports section for a condition that requires a report", () => {
+    cy.intercept("GET", `${AppConfig.apiUrl}/projects`, {
+      body: mockProjects,
+    }).as("getProjects");
+
+    cy.intercept("GET", `${AppConfig.apiUrl}/documents/type`, {
+      body: mockDocumentTypes,
+    }).as("getDocumentTypes");
+
+    cy.intercept("GET", `${AppConfig.apiUrl}/document-category/project/c668a5210cdd8a970fb42722/category/1`, {
+        body: mockCategoryData,
+    }).as("getDocumentCategory");
+
+    cy.intercept("GET", `${AppConfig.apiUrl}/documents/c668a5210cdd8a970fb42722`, {
+        body: mockDocument,
+    }).as("getDocument");
+
+    cy.intercept("GET", `${AppConfig.apiUrl}/conditions/project/c668a5210cdd8a970fb42722/document/c668a5210cdd8a970fb42722?include_subconditions=false`, {
+        body: mockConditions,
+    }).as("getConditions");
+
+    cy.intercept(
+        "GET",
+        `${AppConfig.apiUrl}/conditions/project/c668a5210cdd8a970fb42722/document/c668a5210cdd8a970fb42722/condition/999`,
+        { body: mockSingleConditionWithReport }
+    ).as("getSingleCondition");
+
+    cy.intercept(
+        "GET",
+        `${AppConfig.apiUrl}/reports/condition/999`,
+        { body: mockReports }
+    ).as("getReports");
+
+    mountDefaultPage();
+
+    cy.contains("Certificate and Amendments").click();
+    cy.wait("@getDocumentCategory");
+
+    cy.contains("Schedule B - Table of Conditions").click();
+    cy.wait("@getDocument");
+    cy.wait("@getConditions");
+
+    cy.contains("Test Condition").click();
+    cy.wait("@getSingleCondition").its("response.statusCode").should("eq", 200);
+
+    cy.contains("Condition Attributes").click();
+    cy.wait("@getReports");
+
+    // Reports section renders with one report grouped under its phase
+    cy.contains("Reports").should("exist");
+    cy.contains("All Phases").should("exist");
+
+    // Expand the phase accordion to reveal the submission details
+    cy.contains("All Phases").click();
+    cy.contains("Submission Requirements").should("exist");
+    cy.contains("Compliance Notification").should("exist");
+    cy.contains("Awaiting Confirmation").should("exist");
+    cy.contains("As Needed").should("exist");
+    cy.contains("Within 72 hours of non-compliance").should("exist");
   });
 });

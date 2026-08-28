@@ -9,6 +9,7 @@ from condition_api.models import (
     Condition,
     ConditionAttribute,
     ExtractionRequest,
+    IEMTerms,
     ManagementPlan,
     Report,
     ReportSubmission,
@@ -266,6 +267,76 @@ def test_import_request_loads_reports_and_resolves_cross_condition_plan_link():
     assert cn_report.report_type == "Compliance Notification"
     cn_submission = db.session.query(ReportSubmission).filter_by(report_id=cn_report.id).one()
     assert cn_submission.linked_management_plan_id is None
+
+
+def test_import_request_routes_iem_deliverable_to_iem_terms_not_management_plan():
+    """A deliverable flagged as the IEM Terms of Engagement lands in iem_terms, not management_plans."""
+    auth_guid = TestJwtClaims.staff_admin_role['sub']
+    factory_user_model(auth_guid=auth_guid)
+    g.jwt_oidc_token_info = TestJwtClaims.staff_admin_role
+
+    project = factory_project_model(project_id=str(uuid.uuid4()))
+    doc_type = get_seeded_document_type("Certificate")
+    document = factory_document_model(project_id=project.project_id, document_type_id=doc_type.id)
+    request = ExtractionRequest(
+        project_id=project.project_id,
+        document_id=document.document_id,
+        document_type_id=doc_type.id,
+        document_label=document.document_label,
+        s3_url="condition_extraction_documents/test.pdf",
+        status="completed",
+        extracted_data={
+            "conditions": [
+                {
+                    "condition_number": 1,
+                    "condition_name": "Condition 1",
+                    "condition_text": "The IEM Terms of Engagement must be submitted to the EAO.",
+                    "deliverables": [
+                        {
+                            "is_plan": True,
+                            "is_iem_terms_of_engagement": True,
+                            "deliverable_name": "Independent Environmental Monitor Terms of Engagement",
+                            "approval_type": "Approval",
+                            "fn_consultation_required": True,
+                            "stakeholders_to_consult": ["Nation A"],
+                        },
+                        {
+                            "is_plan": True,
+                            "deliverable_name": "Construction Environmental Management Plan",
+                            "approval_type": "Review",
+                        },
+                    ],
+                }
+            ]
+        },
+    )
+    db.session.add(request)
+    db.session.commit()
+
+    ExtractionRequestService.import_request(request.id)
+
+    condition = db.session.query(Condition).filter_by(document_id=document.document_id).one()
+    assert condition.requires_iem_terms is True
+    assert condition.requires_management_plan is True
+
+    iem_packages = db.session.query(IEMTerms).filter_by(condition_id=condition.id).all()
+    assert len(iem_packages) == 1
+    assert iem_packages[0].name == "Independent Environmental Monitor Terms of Engagement"
+
+    plans = db.session.query(ManagementPlan).filter_by(condition_id=condition.id).all()
+    assert len(plans) == 1
+    assert plans[0].name == "Construction Environmental Management Plan"
+
+    iem_attributes = db.session.query(ConditionAttribute).filter_by(
+        condition_id=condition.id, iem_terms_id=iem_packages[0].id
+    ).all()
+    assert len(iem_attributes) >= 2
+    assert all(attr.management_plan_id is None for attr in iem_attributes)
+
+    plan_attributes = db.session.query(ConditionAttribute).filter_by(
+        condition_id=condition.id, management_plan_id=plans[0].id
+    ).all()
+    assert all(attr.iem_terms_id is None for attr in plan_attributes)
 
 
 def test_get_all_adds_queue_position_and_estimates(monkeypatch):
