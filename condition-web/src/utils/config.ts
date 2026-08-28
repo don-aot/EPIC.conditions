@@ -16,6 +16,7 @@ declare global {
       VITE_CONDITION_DOCUMENTS_FOLDER: string;
       VITE_EAO_SEARCH_URL: string;
     VITE_ENABLE_NEW_SUBMIT_FLOW: string;
+      VITE_CENTRE_API_URL: string;
     };
   }
 }
@@ -47,12 +48,15 @@ const ENABLE_NEW_SUBMIT_FLOW =
   (window._env_?.VITE_ENABLE_NEW_SUBMIT_FLOW || import.meta.env.VITE_ENABLE_NEW_SUBMIT_FLOW || "false").toLowerCase() === "true";
 const EAO_SEARCH_URL =
   window._env_?.VITE_EAO_SEARCH_URL || import.meta.env.VITE_EAO_SEARCH_URL || "https://projects.eao.gov.bc.ca/api/search";
+const CENTRE_API_URL =
+  window._env_?.VITE_CENTRE_API_URL || import.meta.env.VITE_CENTRE_API_URL || "";
 
 export const AppConfig = {
   apiUrl: `${API_URL}`,
   documentUrl: OBJECT_STORAGE_URL,
   conditionDocumentsFolder: CONDITION_DOCUMENTS_FOLDER,
   eaoSearchUrl: EAO_SEARCH_URL,
+  centreApiUrl: `${CENTRE_API_URL}`,
   environment: APP_ENVIRONMENT,
   version: APP_VERSION,
   appTitle: APP_TITLE,
