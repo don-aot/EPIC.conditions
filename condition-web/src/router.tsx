@@ -1,6 +1,7 @@
 import { createRouter, RouterProvider } from "@tanstack/react-router";
 import { routeTree } from "@/routeTree.gen";
 import { useAuth } from "react-oidc-context";
+import { trackAnalytics } from "@epic/centre-analytics";
 import { AppConfig } from "./utils/config";
 
 // Create a new router instance
@@ -23,5 +24,13 @@ declare module "@tanstack/react-router" {
 
 export default function RouterProviderWithAuthContext() {
   const authentication = useAuth();
+
+  // Record user login analytics
+  trackAnalytics({
+    appName: 'condition_repository',
+    centreApiUrl: AppConfig.centreApiUrl,
+    enabled: authentication.isAuthenticated && !!authentication.user,
+  });
+
   return <RouterProvider router={router} context={{ authentication }} />;
 }
