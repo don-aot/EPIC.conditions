@@ -450,7 +450,7 @@ const ReportPhaseAccordion: React.FC<Props> = ({ phase, rows, conditionId, manag
                   >
                     {reportType}
                   </TableCell>
-                  <TableCell sx={{ py: 0.75, textAlign: "right", width: "8%" }}>
+                  <TableCell sx={{ py: 0.75, textAlign: "right", width: "12%" }}>
                     {canManage && (
                       <Button
                         size="small"
@@ -480,33 +480,33 @@ const ReportPhaseAccordion: React.FC<Props> = ({ phase, rows, conditionId, manag
                 </TableRow>
                 {/* Column headers */}
                 <TableRow>
-                  <TableCell sx={{ fontWeight: 700, fontSize: "11px", color: "#666", textTransform: "uppercase", py: 0.5, width: isCN ? "46%" : isMP ? "18%" : "30%" }}>
+                  <TableCell sx={{ fontWeight: 700, fontSize: "11px", color: "#666", textTransform: "uppercase", py: 0.5, width: isCN ? "44%" : isMP ? "16%" : "28%" }}>
                     Frequency
                   </TableCell>
                   {isMP && (
                     <>
-                      <TableCell sx={{ fontWeight: 700, fontSize: "11px", color: "#666", textTransform: "uppercase", py: 0.5, width: "28%" }}>
+                      <TableCell sx={{ fontWeight: 700, fontSize: "11px", color: "#666", textTransform: "uppercase", py: 0.5, width: "24%" }}>
                         Linked Management Plan
                       </TableCell>
-                      <TableCell sx={{ fontWeight: 700, fontSize: "11px", color: "#666", textTransform: "uppercase", py: 0.5, width: "24%" }}>
+                      <TableCell sx={{ fontWeight: 700, fontSize: "11px", color: "#666", textTransform: "uppercase", py: 0.5, width: "22%" }}>
                         Report Title
                       </TableCell>
                     </>
                   )}
                   {isMT && (
-                    <TableCell sx={{ fontWeight: 700, fontSize: "11px", color: "#666", textTransform: "uppercase", py: 0.5, width: "32%" }}>
+                    <TableCell sx={{ fontWeight: 700, fontSize: "11px", color: "#666", textTransform: "uppercase", py: 0.5, width: "28%" }}>
                       Report Title
                     </TableCell>
                   )}
                   {!isCN && !isMP && !isMT && (
-                    <TableCell sx={{ fontWeight: 700, fontSize: "11px", color: "#666", textTransform: "uppercase", py: 0.5, width: "30%" }}>
+                    <TableCell sx={{ fontWeight: 700, fontSize: "11px", color: "#666", textTransform: "uppercase", py: 0.5, width: "28%" }}>
                       {reportType === PSN_TYPE ? "Sub-Condition + Type" : "Type"}
                     </TableCell>
                   )}
-                  <TableCell sx={{ fontWeight: 700, fontSize: "11px", color: "#666", textTransform: "uppercase", py: 0.5, width: isCN ? "46%" : isMP ? "22%" : "30%" }}>
+                  <TableCell sx={{ fontWeight: 700, fontSize: "11px", color: "#666", textTransform: "uppercase", py: 0.5, width: isCN ? "44%" : isMP ? "26%" : "32%" }}>
                     Timing
                   </TableCell>
-                  <TableCell sx={{ width: "8%" }} />
+                  <TableCell sx={{ width: "12%" }} />
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -522,7 +522,7 @@ const ReportPhaseAccordion: React.FC<Props> = ({ phase, rows, conditionId, manag
                             onChange={(e) => { setEdit(row.id, "frequency", e.target.value); setFreqErrors((p) => ({ ...p, [`row_${row.id}`]: false })); }}
                             size="small"
                             error={!!freqErrors[`row_${row.id}`]}
-                            sx={{ minWidth: 140 }}
+                            sx={{ width: "100%" }}
                           >
                             {getFrequencies(reportType).map((f: { value: string; label: string }) => (
                               <MenuItem key={f.value} value={f.value}>{f.label}</MenuItem>
@@ -613,7 +613,7 @@ const ReportPhaseAccordion: React.FC<Props> = ({ phase, rows, conditionId, manag
                                 onChange={(e) => setEdit(row.id, "condition_subsection", e.target.value)}
                                 size="small"
                                 placeholder="e.g. 4.1"
-                                sx={{ width: 90, mt: 3 }}
+                                sx={{ width: 72, mt: 3, flexShrink: 0 }}
                               />
                               {isPSN && (
                                 <Select
@@ -621,7 +621,7 @@ const ReportPhaseAccordion: React.FC<Props> = ({ phase, rows, conditionId, manag
                                   onChange={(e) => setEdit(row.id, "report_submission_type", e.target.value)}
                                   size="small"
                                   displayEmpty
-                                  sx={{ width: 220 }}
+                                  sx={{ flex: 1, minWidth: 0 }}
                                 >
                                   <MenuItem value=""><em>Select...</em></MenuItem>
                                   {PSN_SUBMISSION_TYPES.map((t) => (
@@ -649,7 +649,7 @@ const ReportPhaseAccordion: React.FC<Props> = ({ phase, rows, conditionId, manag
                             placeholder={TIMING_PLACEHOLDER}
                             fullWidth
                             minRows={1}
-                            sx={{ minWidth: 220 ,mt: 3 }}
+                            sx={{ mt: 3 }}
                           />
                         ) : (
                           <Typography fontSize="13px">{row.timing || "—"}</Typography>
@@ -696,7 +696,7 @@ const ReportPhaseAccordion: React.FC<Props> = ({ phase, rows, conditionId, manag
                         onChange={(e) => { setNewField(reportType, "frequency", e.target.value); setFreqErrors((p) => ({ ...p, [`new_${reportType}`]: false })); }}
                         size="small"
                         error={!!freqErrors[`new_${reportType}`]}
-                        sx={{ minWidth: 140 }}
+                        sx={{ width: "100%" }}
                         displayEmpty
                       >
                         <MenuItem value="" disabled><em>Frequency</em></MenuItem>
@@ -758,7 +758,7 @@ const ReportPhaseAccordion: React.FC<Props> = ({ phase, rows, conditionId, manag
                             onChange={(e) => setNewField(reportType, "condition_subsection", e.target.value)}
                             size="small"
                             placeholder="e.g. 4.1"
-                            sx={{ width: 90 , mt: 3 }}
+                            sx={{ width: 72, mt: 3, flexShrink: 0 }}
                           />
                           {isPSN && (
                             <Select
@@ -766,7 +766,7 @@ const ReportPhaseAccordion: React.FC<Props> = ({ phase, rows, conditionId, manag
                               onChange={(e) => setNewField(reportType, "report_submission_type", e.target.value)}
                               size="small"
                               displayEmpty
-                              sx={{ width: 220 }}
+                              sx={{ flex: 1, minWidth: 0 }}
                             >
                               <MenuItem value=""><em>Select type...</em></MenuItem>
                               {PSN_SUBMISSION_TYPES.map((t) => (
@@ -783,9 +783,8 @@ const ReportPhaseAccordion: React.FC<Props> = ({ phase, rows, conditionId, manag
                         onChange={(e) => setNewField(reportType, "timing", e.target.value)}
                         size="small"
                         placeholder={TIMING_PLACEHOLDER}
-                        multiline
-                        minRows={1}
-                        sx={{ minWidth: 220, mt: 3 }}
+                        fullWidth
+                        sx={{ mt: 3 }}
                       />
                     </TableCell>
                     <TableCell sx={{ py: 1, verticalAlign: "middle" }}>
