@@ -32,7 +32,7 @@ import {
   useRemoveReportSubmission,
 } from "@/hooks/api/useReport";
 import { notify } from "@/components/Shared/Snackbar/snackbarStore";
-import { getFrequencies, PSN_SUBMISSION_TYPES } from "./constants";
+import { getFrequencies, PSN_SUBMISSION_TYPES, MT_TYPE } from "./constants";
 import { useHasAllowedRoles, KeycloakRoles } from "@/hooks/useAuthorization";
 import { BCDesignTokens } from "epic.theme";
 
@@ -437,6 +437,7 @@ const ReportPhaseAccordion: React.FC<Props> = ({ phase, rows, conditionId, manag
         {Object.entries(byType).map(([reportType, typeRows]) => {
           const isCN = reportType === CN_TYPE || reportType === CSR_TYPE;
           const isMP = reportType === MP_TYPE;
+          const isMT = reportType === MT_TYPE;
           return (
           <TableContainer key={reportType} sx={{ mb: 1 }}>
             <Table size="small" sx={{ width: "100%", tableLayout: "fixed", "& td": { verticalAlign: "middle" } }}>
@@ -492,9 +493,14 @@ const ReportPhaseAccordion: React.FC<Props> = ({ phase, rows, conditionId, manag
                       </TableCell>
                     </>
                   )}
-                  {!isCN && !isMP && (
+                  {isMT && (
+                    <TableCell sx={{ fontWeight: 700, fontSize: "11px", color: "#666", textTransform: "uppercase", py: 0.5, width: "32%" }}>
+                      Report Title
+                    </TableCell>
+                  )}
+                  {!isCN && !isMP && !isMT && (
                     <TableCell sx={{ fontWeight: 700, fontSize: "11px", color: "#666", textTransform: "uppercase", py: 0.5, width: "30%" }}>
-                      Type
+                      {reportType === PSN_TYPE ? "Sub-Condition + Type" : "Type"}
                     </TableCell>
                   )}
                   <TableCell sx={{ fontWeight: 700, fontSize: "11px", color: "#666", textTransform: "uppercase", py: 0.5, width: isCN ? "46%" : isMP ? "22%" : "30%" }}>
@@ -579,8 +585,26 @@ const ReportPhaseAccordion: React.FC<Props> = ({ phase, rows, conditionId, manag
                         </>
                       )}
 
+                      {/* Monitoring/Technical: Report Title column */}
+                      {isMT && (
+                        <TableCell sx={{ py: 1, verticalAlign: "middle" }}>
+                          {editMode ? (
+                            <TextField
+                              value={ev?.report_title ?? ""}
+                              onChange={(e) => setEdit(row.id, "report_title", e.target.value)}
+                              size="small"
+                              placeholder="Report title..."
+                              fullWidth
+                              sx={{ mt: 3 }}
+                            />
+                          ) : (
+                            <Typography fontSize="13px">{row.report_title || "—"}</Typography>
+                          )}
+                        </TableCell>
+                      )}
+
                       {/* Type column — PSN/other report types */}
-                      {!isCN && !isMP && (
+                      {!isCN && !isMP && !isMT && (
                         <TableCell sx={{ py: 1, verticalAlign: "middle" }}>
                           {editMode ? (
                             <Box display="flex" gap={1} flexDirection="row" alignItems="center">
@@ -714,7 +738,19 @@ const ReportPhaseAccordion: React.FC<Props> = ({ phase, rows, conditionId, manag
                         </TableCell>
                       </>
                     )}
-                    {!isCN && !isMP && (
+                    {isMT && (
+                      <TableCell sx={{ py: 1, verticalAlign: "middle" }}>
+                        <TextField
+                          value={newSubs[reportType]!.report_title ?? ""}
+                          onChange={(e) => setNewField(reportType, "report_title", e.target.value)}
+                          size="small"
+                          placeholder="Report title..."
+                          fullWidth
+                          sx={{ mt: 3 }}
+                        />
+                      </TableCell>
+                    )}
+                    {!isCN && !isMP && !isMT && (
                       <TableCell sx={{ py: 1, verticalAlign: "middle" }}>
                         <Box display="flex" gap={1} flexDirection="row" alignItems="center">
                           <TextField
@@ -830,7 +866,7 @@ const ReportPhaseAccordion: React.FC<Props> = ({ phase, rows, conditionId, manag
             </Button>
             {confirmError && (
               <Typography fontSize="12px" color="error">
-                Select a management plan before confirming
+                Link a Management Plan before confirming
               </Typography>
             )}
           </Box>
