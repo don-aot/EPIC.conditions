@@ -8,6 +8,7 @@ export const REPORT_TYPES = [
 
 export const REPORT_PHASES = [
   "All Phases",
+  "Pre-Construction",
   "Construction",
   "Operations",
   "Closure",
@@ -39,7 +40,7 @@ const PSN_TYPE = "Project Status Notification";
 const CN_TYPE = "Compliance Notification";
 const CSR_TYPE = "Compliance Self-Report";
 const MP_TYPE = "Management Plan Associated Report";
-const MT_TYPE = "Monitoring/Technical Report";
+export const MT_TYPE = "Monitoring/Technical Report";
 
 export const getFrequencies = (reportType: string) => {
   if (reportType === PSN_TYPE) return PSN_FREQUENCIES;

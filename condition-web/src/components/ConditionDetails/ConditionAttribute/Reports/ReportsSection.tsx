@@ -96,21 +96,6 @@ const ReportsSection = memo(({ condition, onEmpty }: Props) => {
         <Typography fontSize="18px" color="#2d2d2d" ml="15px">
           Reports
         </Typography>
-        <Box
-          sx={{
-            height: 22,
-            borderRadius: "100px",
-            backgroundColor: "#d8d8d8",
-            color: "#474543",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            fontSize: "12px",
-            px: 1,
-          }}
-        >
-          {reports.length}
-        </Box>
       </Box>
 
       <Box sx={{ px: "28px", py: 2 }}>

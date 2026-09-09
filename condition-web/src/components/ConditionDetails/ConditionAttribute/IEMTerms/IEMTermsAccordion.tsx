@@ -626,7 +626,7 @@ const IEMTermsAccordion: React.FC<Props> = ({
 
           <ErrorMessage
             visible={conditionAttributeError}
-            message="Please complete all the required attribute fields before confirming the IEM Terms Attributes."
+            message="Please complete all the required attribute fields before confirming the IEM ToE Attributes."
           />
 
           <Stack sx={{ mt: 2 }} direction={"row"} justifyContent="space-between" alignItems="flex-end">
@@ -654,8 +654,8 @@ const IEMTermsAccordion: React.FC<Props> = ({
                   onApprove={handleApproveTerms}
                   label={
                     attributes.is_approved
-                      ? "Un-confirm IEM Terms Attributes"
-                      : "Confirm IEM Terms Attributes"
+                      ? "Un-confirm IEM ToE Attributes"
+                      : "Confirm IEM ToE Attributes"
                   }
                 />
               </Box>

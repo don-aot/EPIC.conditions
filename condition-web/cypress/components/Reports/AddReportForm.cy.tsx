@@ -137,4 +137,40 @@ describe("AddReportForm", () => {
     cy.contains("Select frequency...").click();
     cy.get('li[role="option"]').contains("Quarterly").should("exist");
   });
+
+  it("reveals a Report Title field (without Linked Management Plan) and submits a valid Monitoring/Technical Report", () => {
+    mountForm();
+
+    cy.contains("Select report type...").click();
+    cy.get('li[role="option"]').contains("Monitoring/Technical Report").click();
+
+    cy.contains("Linked Management Plan").should("not.exist");
+    cy.contains("Report Title").should("exist");
+    cy.get('input[placeholder="Enter report title..."]').type("Annual Water Quality Report");
+
+    cy.contains("Select frequency...").click();
+    cy.get('li[role="option"]').contains("Quarterly").click();
+
+    cy.get('input[placeholder="e.g. within 30 days after the issuance of this Certificate."]').type(
+      "Within 30 days after each quarter"
+    );
+
+    cy.contains("All Phases").click();
+
+    cy.contains("Save Report").click();
+
+    cy.get("@onSave").should("have.been.calledOnce");
+    cy.get("@onSave")
+      .its("firstCall.args.0")
+      .should("deep.include", {
+        report_type: "Monitoring/Technical Report",
+        report_title: "Annual Water Quality Report",
+      });
+    cy.get("@onSave")
+      .its("firstCall.args.0.submissions.0")
+      .should("deep.include", {
+        frequency: "Quarterly",
+        timing: "Within 30 days after each quarter",
+      });
+  });
 });
