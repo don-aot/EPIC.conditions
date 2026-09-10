@@ -16,7 +16,6 @@ import {
   TableHead,
   TableRow,
   TextField,
-  Tooltip,
   Typography,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
@@ -168,14 +167,7 @@ const ReportPhaseAccordion: React.FC<Props> = ({ phase, rows, conditionId, manag
     setExpanded(true);
   };
 
-  const cancelEdit = () => {
-    setEditMode(false);
-    setEditMap({});
-    setNewSubs({});
-    setFreqErrors({});
-  };
-
-  const saveAll = async () => {
+const saveAll = async () => {
     const errors: Record<string, boolean> = {};
     rows.forEach((row) => {
       if (!editMap[row.id]?.frequency) errors[`row_${row.id}`] = true;
@@ -339,15 +331,13 @@ const ReportPhaseAccordion: React.FC<Props> = ({ phase, rows, conditionId, manag
         <Box flex={1} />
         {statusChip}
         {canManage && (
-          <Tooltip title="Remove phase">
-            <IconButton
-              size="small"
-              onClick={(e) => { e.stopPropagation(); setConfirmRemovePhase(true); }}
-              sx={{ color: "#888", mr: 0.5 }}
-            >
-              <DeleteIcon size={16} />
-            </IconButton>
-          </Tooltip>
+          <IconButton
+            size="small"
+            onClick={(e) => { e.stopPropagation(); setConfirmRemovePhase(true); }}
+            sx={{ color: "#888", mr: 0.5 }}
+          >
+            <DeleteIcon size={16} />
+          </IconButton>
         )}
       </AccordionSummary>
 
@@ -386,25 +376,6 @@ const ReportPhaseAccordion: React.FC<Props> = ({ phase, rows, conditionId, manag
                   }}
                 >
                   {saving ? "Saving..." : "Save"}
-                </Button>
-                <Button
-                  size="small"
-                  disableRipple
-                  onClick={cancelEdit}
-                  sx={{
-                    fontSize: "14px",
-                    fontWeight: 700,
-                    textTransform: "none",
-                    color: "#6d7274",
-                    p: 0,
-                    minWidth: 0,
-                    background: "transparent",
-                    "&:hover": { background: "transparent", textDecoration: "underline" },
-                    "&:active": { background: "transparent" },
-                    "&:focus": { background: "transparent" },
-                  }}
-                >
-                  Cancel
                 </Button>
               </Box>
             ) : (
@@ -451,7 +422,7 @@ const ReportPhaseAccordion: React.FC<Props> = ({ phase, rows, conditionId, manag
                     {reportType}
                   </TableCell>
                   <TableCell sx={{ py: 0.75, textAlign: "right", width: "12%" }}>
-                    {canManage && (
+                    {canManage && editMode && (
                       <Button
                         size="small"
                         disableRipple
@@ -522,7 +493,7 @@ const ReportPhaseAccordion: React.FC<Props> = ({ phase, rows, conditionId, manag
                             onChange={(e) => { setEdit(row.id, "frequency", e.target.value); setFreqErrors((p) => ({ ...p, [`row_${row.id}`]: false })); }}
                             size="small"
                             error={!!freqErrors[`row_${row.id}`]}
-                            sx={{ width: "100%" }}
+                            sx={{ width: "100%", fontSize: "14px" }}
                           >
                             {getFrequencies(reportType).map((f: { value: string; label: string }) => (
                               <MenuItem key={f.value} value={f.value}>{f.label}</MenuItem>
@@ -549,6 +520,7 @@ const ReportPhaseAccordion: React.FC<Props> = ({ phase, rows, conditionId, manag
                                 }))}
                                 size="small"
                                 fullWidth
+                                sx={{ fontSize: "14px", "& .MuiSelect-select": { color: (ev?.linked_management_plan_id ?? -1) > 0 ? "inherit" : "rgba(0,0,0,0.38)" } }}
                               >
                                 <MenuItem value={-1}><em>Select management plan...</em></MenuItem>
                                 {managementPlans.map((mp, idx) => (
@@ -621,7 +593,7 @@ const ReportPhaseAccordion: React.FC<Props> = ({ phase, rows, conditionId, manag
                                   onChange={(e) => setEdit(row.id, "report_submission_type", e.target.value)}
                                   size="small"
                                   displayEmpty
-                                  sx={{ flex: 1, minWidth: 0 }}
+                                  sx={{ flex: 1, minWidth: 0, fontSize: "14px", "& .MuiSelect-select": { color: ev?.report_submission_type ? "inherit" : "rgba(0,0,0,0.38)" } }}
                                 >
                                   <MenuItem value=""><em>Select...</em></MenuItem>
                                   {PSN_SUBMISSION_TYPES.map((t) => (
@@ -696,7 +668,7 @@ const ReportPhaseAccordion: React.FC<Props> = ({ phase, rows, conditionId, manag
                         onChange={(e) => { setNewField(reportType, "frequency", e.target.value); setFreqErrors((p) => ({ ...p, [`new_${reportType}`]: false })); }}
                         size="small"
                         error={!!freqErrors[`new_${reportType}`]}
-                        sx={{ width: "100%" }}
+                        sx={{ width: "100%", fontSize: "14px", "& .MuiSelect-select": { color: newSubs[reportType]!.frequency ? "inherit" : "rgba(0,0,0,0.38)" } }}
                         displayEmpty
                       >
                         <MenuItem value="" disabled><em>Frequency</em></MenuItem>
@@ -719,6 +691,7 @@ const ReportPhaseAccordion: React.FC<Props> = ({ phase, rows, conditionId, manag
                             }))}
                             size="small"
                             fullWidth
+                            sx={{ fontSize: "14px", "& .MuiSelect-select": { color: (newSubs[reportType]!.linked_management_plan_id ?? -1) > 0 ? "inherit" : "rgba(0,0,0,0.38)" } }}
                           >
                             <MenuItem value={-1}><em>Select management plan...</em></MenuItem>
                             {managementPlans.map((mp, idx) => (
@@ -734,6 +707,7 @@ const ReportPhaseAccordion: React.FC<Props> = ({ phase, rows, conditionId, manag
                             placeholder="Report title..."
                             fullWidth
                             sx={{ mt: 3 }}
+                            inputProps={{ style: { fontSize: "14px" } }}
                           />
                         </TableCell>
                       </>
@@ -747,6 +721,7 @@ const ReportPhaseAccordion: React.FC<Props> = ({ phase, rows, conditionId, manag
                           placeholder="Report title..."
                           fullWidth
                           sx={{ mt: 3 }}
+                          inputProps={{ style: { fontSize: "14px" } }}
                         />
                       </TableCell>
                     )}
@@ -759,6 +734,7 @@ const ReportPhaseAccordion: React.FC<Props> = ({ phase, rows, conditionId, manag
                             size="small"
                             placeholder="e.g. 4.1"
                             sx={{ width: 72, mt: 3, flexShrink: 0 }}
+                            inputProps={{ style: { fontSize: "14px" } }}
                           />
                           {isPSN && (
                             <Select
@@ -766,7 +742,7 @@ const ReportPhaseAccordion: React.FC<Props> = ({ phase, rows, conditionId, manag
                               onChange={(e) => setNewField(reportType, "report_submission_type", e.target.value)}
                               size="small"
                               displayEmpty
-                              sx={{ flex: 1, minWidth: 0 }}
+                              sx={{ flex: 1, minWidth: 0, fontSize: "14px", "& .MuiSelect-select": { color: newSubs[reportType]!.report_submission_type ? "inherit" : "rgba(0,0,0,0.38)" } }}
                             >
                               <MenuItem value=""><em>Select type...</em></MenuItem>
                               {PSN_SUBMISSION_TYPES.map((t) => (
@@ -785,6 +761,7 @@ const ReportPhaseAccordion: React.FC<Props> = ({ phase, rows, conditionId, manag
                         placeholder={TIMING_PLACEHOLDER}
                         fullWidth
                         sx={{ mt: 3 }}
+                        inputProps={{ style: { fontSize: "14px" } }}
                       />
                     </TableCell>
                     <TableCell sx={{ py: 1, verticalAlign: "middle" }}>
@@ -815,7 +792,7 @@ const ReportPhaseAccordion: React.FC<Props> = ({ phase, rows, conditionId, manag
                 )}
               </TableBody>
             </Table>
-            {editMode && (
+            {editMode && !(newSubs[reportType] !== null && newSubs[reportType] !== undefined) && (
               <Box px={2} pb={1} pt={0.5}>
                 <Button
                   size="small"
@@ -824,7 +801,6 @@ const ReportPhaseAccordion: React.FC<Props> = ({ phase, rows, conditionId, manag
                     ...prev,
                     [reportType]: { frequency: "", timing: "", condition_subsection: "", report_submission_type: "", linked_management_plan_id: null, report_title: "" },
                   }))}
-                  disabled={newSubs[reportType] !== null && newSubs[reportType] !== undefined}
                   startIcon={<AddIcon sx={{ fontSize: "13px !important" }} />}
                   sx={{
                     fontSize: "13px",
@@ -838,10 +814,6 @@ const ReportPhaseAccordion: React.FC<Props> = ({ phase, rows, conditionId, manag
                     "&:hover": { background: "transparent", textDecoration: "underline" },
                     "&:active": { background: "transparent" },
                     "&:focus": { background: "transparent" },
-                    "&.Mui-disabled": {
-                      color: "#aaa",
-                      background: "transparent",
-                    },
                   }}
                 >
                   Add Submission Requirement

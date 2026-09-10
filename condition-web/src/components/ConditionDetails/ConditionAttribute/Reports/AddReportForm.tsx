@@ -186,7 +186,7 @@ const AddReportForm = forwardRef<AddReportFormHandle, Props>(({
             value={form.linked_management_plan_id ?? ""}
             onChange={(e) => setField("linked_management_plan_id", e.target.value ? Number(e.target.value) : undefined)}
             displayEmpty
-            sx={{ width: fieldWidth, height: 40 }}
+            sx={{ width: fieldWidth, height: 40, "& .MuiSelect-select": { color: form.linked_management_plan_id ? "inherit" : "rgba(0,0,0,0.38)" } }}
           >
             {managementPlans.map((mp) => (
               <MenuItem key={mp.id} value={mp.id}>{mp.name || `Management Plan ${mp.id}`}</MenuItem>
