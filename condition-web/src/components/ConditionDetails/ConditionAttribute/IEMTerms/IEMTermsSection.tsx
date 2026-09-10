@@ -52,20 +52,22 @@ const IEMTermsSection = memo(({ condition, setCondition }: IEMTermsSectionProps)
   if (iemTermsList.length === 0) return null;
 
   return (
-    <Box sx={{ mb: 2 }}>
+    <Box>
       {/* Section header */}
       <Box
         sx={{
           display: "flex",
           alignItems: "center",
           gap: 1.5,
-          ml: "28px",
+          mx: "28px",
+          mt: "28px",
+          px: 2,
           py: 1,
           backgroundColor: "#f1f8fe",
           borderRadius: "2px 2px 0 0",
         }}
       >
-        <Typography fontSize="18px" color="#2d2d2d" ml="15px">
+        <Typography fontSize="18px" color="#2d2d2d">
           IEM Terms of Engagement
         </Typography>
         <Box
@@ -86,7 +88,7 @@ const IEMTermsSection = memo(({ condition, setCondition }: IEMTermsSectionProps)
       </Box>
 
       {/* Accordions */}
-      <Box sx={{ px: "28px", py: 2 }}>
+      <Box sx={{ px: "28px", pt: 2 }}>
         {iemTermsList.map((terms, index) => (
           <IEMTermsAccordion
             key={terms.id}

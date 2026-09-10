@@ -80,25 +80,26 @@ const ReportsSection = memo(({ condition, onEmpty }: Props) => {
   ];
 
   return (
-    <Box sx={{ mb: 2 }}>
+    <Box>
       {/* Section header */}
       <Box
         sx={{
           display: "flex",
           alignItems: "center",
-          gap: 1.5,
-          ml: "28px",
+          mx: "28px",
+          mt: "28px",
+          px: 2,
           py: 1,
           backgroundColor: "#f1f8fe",
           borderRadius: "2px 2px 0 0",
         }}
       >
-        <Typography fontSize="18px" color="#2d2d2d" ml="15px">
+        <Typography fontSize="18px" color="#2d2d2d">
           Reports
         </Typography>
       </Box>
 
-      <Box sx={{ px: "28px", py: 2 }}>
+      <Box sx={{ px: "28px", pt: 2 }}>
         {isLoading ? (
           <CircularProgress size={24} />
         ) : (
