@@ -7,6 +7,7 @@ import { ConditionModel, ConditionType } from "@/models/Condition";
 import { BCDesignTokens } from "epic.theme";
 import { StyledLabel } from "../Shared/Table/common";
 import { useUpdateConditionDetails } from "@/hooks/api/useConditions";
+import { useGetReports } from "@/hooks/api/useReport";
 import { notify } from "@/components/Shared/Snackbar/snackbarStore";
 import { PartialUpdateTopicTagsModel } from "@/models/Condition";
 import ChipInput from "../Shared/Chips/ChipInput";
@@ -53,6 +54,14 @@ const ConditionHeader = ({
     };
 
     const isAmendCondition = condition.condition_type === ConditionType.AMEND;
+
+    const { data: reports = [] } = useGetReports(condition.condition_id);
+    const isConditionAttributesApproved =
+        (condition.condition_attributes?.management_plans ?? []).every((plan) => plan.is_approved)
+        && (condition.condition_attributes?.iem_terms ?? []).every((terms) => terms.is_approved)
+        && reports
+            .flatMap((report) => report.submissions ?? [])
+            .every((submission) => submission.is_approved);
 
     const { data: conditionDetails, mutateAsync: updateConditionDetails } = useUpdateConditionDetails(
         true,
@@ -399,7 +408,7 @@ const ConditionHeader = ({
             <DocumentStatusChip
               status={
                 condition?.is_approved
-                && condition?.is_condition_attributes_approved
+                && isConditionAttributesApproved
                 && condition?.is_topic_tags_approved
                   ? "true"
                   : "false"
