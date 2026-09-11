@@ -59,8 +59,6 @@ const IEMTermsSection = memo(({ condition, setCondition }: IEMTermsSectionProps)
           display: "flex",
           alignItems: "center",
           gap: 1.5,
-          mx: "28px",
-          mt: "28px",
           px: 2,
           py: 1,
           backgroundColor: "#f1f8fe",
@@ -88,7 +86,7 @@ const IEMTermsSection = memo(({ condition, setCondition }: IEMTermsSectionProps)
       </Box>
 
       {/* Accordions */}
-      <Box sx={{ px: "28px", pt: 2 }}>
+      <Box sx={{ pt: 2 }}>
         {iemTermsList.map((terms, index) => (
           <IEMTermsAccordion
             key={terms.id}

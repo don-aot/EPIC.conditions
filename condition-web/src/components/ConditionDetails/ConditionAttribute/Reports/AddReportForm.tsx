@@ -162,7 +162,7 @@ const AddReportForm = forwardRef<AddReportFormHandle, Props>(({
           value={form.report_type}
           onChange={(e) => handleTypeChange(e.target.value)}
           displayEmpty
-          sx={{ width: fieldWidth, height: 40, "& .MuiSelect-select": { color: form.report_type ? "inherit" : "rgba(0,0,0,0.38)" } }}
+          sx={{ width: fieldWidth, height: 40, "& .MuiSelect-select": { fontSize: "14px", color: form.report_type ? "inherit" : "rgba(0,0,0,0.38)" } }}
           error={!!errors.report_type}
         >
           <MenuItem value="" disabled><em>Select report type...</em></MenuItem>
@@ -186,7 +186,7 @@ const AddReportForm = forwardRef<AddReportFormHandle, Props>(({
             value={form.linked_management_plan_id ?? ""}
             onChange={(e) => setField("linked_management_plan_id", e.target.value ? Number(e.target.value) : undefined)}
             displayEmpty
-            sx={{ width: fieldWidth, height: 40, "& .MuiSelect-select": { color: form.linked_management_plan_id ? "inherit" : "rgba(0,0,0,0.38)" } }}
+            sx={{ width: fieldWidth, height: 40, "& .MuiSelect-select": { fontSize: "14px", color: form.linked_management_plan_id ? "inherit" : "rgba(0,0,0,0.38)" } }}
           >
             {managementPlans.map((mp) => (
               <MenuItem key={mp.id} value={mp.id}>{mp.name || `Management Plan ${mp.id}`}</MenuItem>
@@ -205,6 +205,7 @@ const AddReportForm = forwardRef<AddReportFormHandle, Props>(({
             placeholder="Enter report title..."
             size="small"
             sx={{ width: fieldWidth }}
+            inputProps={{ style: { fontSize: "14px" } }}
           />
         </Box>
       )}
@@ -244,7 +245,7 @@ const AddReportForm = forwardRef<AddReportFormHandle, Props>(({
                   displayEmpty
                   size="small"
                   fullWidth
-                  sx={{ height: 40, "& .MuiSelect-select": { color: sub.report_submission_type ? "inherit" : "rgba(0,0,0,0.38)" } }}
+                  sx={{ height: 40, "& .MuiSelect-select": { fontSize: "14px", color: sub.report_submission_type ? "inherit" : "rgba(0,0,0,0.38)" } }}
                 >
                   <MenuItem value=""><em>Select type...</em></MenuItem>
                   {PSN_SUBMISSION_TYPES.map((t) => (
@@ -262,7 +263,7 @@ const AddReportForm = forwardRef<AddReportFormHandle, Props>(({
               value={sub.frequency}
               onChange={(e) => updateSub(i, "frequency", e.target.value)}
               displayEmpty
-              sx={{ width: fieldWidth, height: 40, "& .MuiSelect-select": { color: sub.frequency ? "inherit" : "rgba(0,0,0,0.38)" } }}
+              sx={{ width: fieldWidth, height: 40, "& .MuiSelect-select": { fontSize: "14px", color: sub.frequency ? "inherit" : "rgba(0,0,0,0.38)" } }}
               error={!!errors[`frequency_${i}`]}
             >
               <MenuItem value="" disabled><em>Select frequency...</em></MenuItem>

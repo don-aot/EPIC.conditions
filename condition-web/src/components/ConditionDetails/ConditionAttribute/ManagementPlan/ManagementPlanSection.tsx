@@ -78,8 +78,6 @@ const ManagementPlanSection = memo(
             display: "flex",
             alignItems: "center",
             gap: 1.5,
-            mx: "28px",
-            mt: "28px",
             px: 2,
             py: 1,
             backgroundColor: "#f1f8fe",
@@ -107,7 +105,7 @@ const ManagementPlanSection = memo(
         </Box>
 
         {/* Accordions */}
-        <Box sx={{ px: "28px", pt: 2 }}>
+        <Box sx={{ pt: 2 }}>
           {managementPlans.map((plan, index) => (
             <ManagementPlanAccordion
               key={plan.id}

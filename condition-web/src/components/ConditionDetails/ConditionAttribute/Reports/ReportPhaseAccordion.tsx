@@ -661,7 +661,7 @@ const saveAll = async () => {
 
                 {/* New submission row per report type */}
                 {editMode && newSubs[reportType] !== null && newSubs[reportType] !== undefined && (
-                  <TableRow>
+                  <TableRow sx={{ "& td": { borderBottom: 0 } }}>
                     <TableCell sx={{ py: 1, verticalAlign: "middle" }}>
                       <Select
                         value={newSubs[reportType]!.frequency}

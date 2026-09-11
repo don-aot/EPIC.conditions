@@ -86,8 +86,6 @@ const ReportsSection = memo(({ condition, onEmpty }: Props) => {
         sx={{
           display: "flex",
           alignItems: "center",
-          mx: "28px",
-          mt: "28px",
           px: 2,
           py: 1,
           backgroundColor: "#f1f8fe",
@@ -99,7 +97,7 @@ const ReportsSection = memo(({ condition, onEmpty }: Props) => {
         </Typography>
       </Box>
 
-      <Box sx={{ px: "28px", pt: 2 }}>
+      <Box sx={{ pt: 2 }}>
         {isLoading ? (
           <CircularProgress size={24} />
         ) : (

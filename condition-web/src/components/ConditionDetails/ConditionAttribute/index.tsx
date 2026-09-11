@@ -453,7 +453,7 @@ const ConditionAttribute = memo(
                 variant="contained"
                 onClick={() => setShowForm(true)}
                 startIcon={<AddIcon />}
-                sx={{ m: "28px" }}
+                sx={{ mt: 2 }}
                 data-testid="add-submission-type-btn"
               >
                 Add Submission Type
@@ -462,7 +462,7 @@ const ConditionAttribute = memo(
 
             {/* Inline form when adding more types */}
             {showForm && (
-              <Box sx={{ mt: 2, ml: "28px" }}>
+              <Box sx={{ pt: 2 }}>
                 {submissionTypeForm}
               </Box>
             )}
